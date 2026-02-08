@@ -4033,6 +4033,18 @@
             display: none;
         }
         
+        /* Shake animation for paste attempt */
+        @keyframes shakeNo {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        
+        .english-validation-content input.shake {
+            animation: shakeNo 0.5s;
+            border-color: #f44336 !important;
+        }
+        
         .english-validation-content .success-message {
             color: #4caf50;
             font-size: 14px;
@@ -4068,9 +4080,12 @@
     <!-- English Validation Modal -->
     <div class="english-validation-modal" id="englishValidationModal">
         <div class="english-validation-content">
-            <h3>🎓 Type this sentence to close</h3>
+            <h3>🎓 Type the sentence to close</h3>
             <div class="sentence-display" id="sentenceDisplay"></div>
-            <input type="text" id="sentenceInput" placeholder="Type the exact sentence here..." autocomplete="off" />
+            <p style="font-size: 11px; color: #888; margin: 5px 0 10px 0; font-style: italic;">
+                💡 Hint: Type the sentence above or "Tôi chịu thua :(" to give up
+            </p>
+            <input type="text" id="sentenceInput" placeholder="Type the sentence or 'Tôi chịu thua :('..." autocomplete="off" />
             <div class="error-message" id="errorMessage">❌ Incorrect! Try again.</div>
             <div class="success-message" id="successMessage">✅ Perfect! Closing...</div>
             <div class="buttons">
@@ -8270,13 +8285,17 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const sentenceDisplay = document.getElementById('sentenceDisplay');
                         const input = document.getElementById('sentenceInput');
                         const errorMessage = document.getElementById('errorMessage');
+                        const successMessage = document.getElementById('successMessage');
                         const btnSubmit = document.getElementById('btnSubmitValidation');
                         const btnCancel = document.getElementById('btnCancelValidation');
                         
                         // Set sentence
                         sentenceDisplay.textContent = sentence;
                         input.value = '';
+                        errorMessage.textContent = '❌ Incorrect! Try again.';
                         errorMessage.style.display = 'none';
+                        successMessage.textContent = '✅ Perfect! Closing...';
+                        successMessage.style.display = 'none';
                         
                         // Show modal
                         modal.style.display = 'flex';
@@ -8286,9 +8305,39 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             input.focus();
                         }, 100);
                         
-                        // Disable paste
+                        // Disable paste with funny messages
+                        const pasteMessages = [
+                            "❌ Hey hey hey! Type it out, no cheating! 😤",
+                            "❌ Pasting, huh? Thought it was that easy? Type it! 🤣",
+                            "❌ Copy-paste detector activated! Type or get out! 🚨",
+                            "❌ Ctrl+V? I see you! Type it properly! 😏",
+                            "❌ Paste detected! You shall not pass! 🧙‍♂️",
+                            "❌ I caught you pasting! No way! 👀",
+                            "❌ Pasting = Cheating! Typing = Real learning! 📚",
+                            "❌ Nice try! But no pasting allowed! 🙅‍♂️",
+                            "❌ Paste is for noobs! Real ones type! ⌨️",
+                            "❌ Busted! Caught you pasting! Type it again! 🕵️"
+                        ];
+                        
                         input.onpaste = (e) => {
                             e.preventDefault();
+                            
+                            // Show random funny message
+                            const randomMsg = pasteMessages[Math.floor(Math.random() * pasteMessages.length)];
+                            errorMessage.textContent = randomMsg;
+                            errorMessage.style.display = 'block';
+                            
+                            // Shake animation
+                            input.classList.add('shake');
+                            setTimeout(() => {
+                                input.classList.remove('shake');
+                            }, 500);
+                            
+                            // Hide message after 3 seconds
+                            setTimeout(() => {
+                                errorMessage.style.display = 'none';
+                            }, 3000);
+                            
                             return false;
                         };
                         
@@ -8302,23 +8351,101 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const handleSubmit = () => {
                             const userInput = input.value.trim();
                             
-                            // Normalize both strings for comparison (case-insensitive, ignore trailing punctuation)
+                            // 😈 TROLL: Check if user tries to surrender
+                            if (userInput === 'Tôi chịu thua :(' || userInput.toLowerCase() === 'tôi chịu thua :(' || 
+                                userInput === 'Toi chiu thua :(' || userInput.toLowerCase() === 'toi chiu thua :(') {
+                                errorMessage.textContent = '❌ Thua cái gì nhập đúng câu đi chứ, đừng có lười 😈';
+                                errorMessage.style.display = 'block';
+                                
+                                // Shake animation
+                                input.classList.add('shake');
+                                setTimeout(() => {
+                                    input.classList.remove('shake');
+                                }, 500);
+                                
+                                input.value = '';
+                                input.focus();
+                                return;
+                            }
+                            
+                            // 😈 TROLL: Check if user tries to surrender
+                            if (userInput === 'Tôi chịu thua!!' || userInput.toLowerCase() === 'tôi chịu thua' || 
+                                userInput === 'Toi chiu thua!!' || userInput.toLowerCase() === 'toi chiu thua') {
+                                errorMessage.textContent = '❌ Thua cái gì nhập đúng câu đi chứ, đừng có lười 😈';
+                                errorMessage.style.display = 'block';
+                                
+                                // Shake animation
+                                input.classList.add('shake');
+                                setTimeout(() => {
+                                    input.classList.remove('shake');
+                                }, 500);
+                                
+                                input.value = '';
+                                input.focus();
+                                return;
+                            }
+                            
+                            // Remove ALL punctuation and special characters, keep only letters, numbers, spaces
                             const normalizeString = (str) => {
-                                return str.toLowerCase().replace(/[.,!?;:]$/, '').trim();
+                                return str.toLowerCase()
+                                    .replace(/[.,!?;:'"''""-]/g, '')  // Remove all punctuation
+                                    .replace(/\s+/g, ' ')              // Normalize multiple spaces
+                                    .trim();
+                            };
+                            
+                            // Calculate similarity percentage
+                            const calculateSimilarity = (str1, str2) => {
+                                // Levenshtein distance
+                                const getDistance = (a, b) => {
+                                    const matrix = [];
+                                    for (let i = 0; i <= b.length; i++) {
+                                        matrix[i] = [i];
+                                    }
+                                    for (let j = 0; j <= a.length; j++) {
+                                        matrix[0][j] = j;
+                                    }
+                                    for (let i = 1; i <= b.length; i++) {
+                                        for (let j = 1; j <= a.length; j++) {
+                                            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                                                matrix[i][j] = matrix[i - 1][j - 1];
+                                            } else {
+                                                matrix[i][j] = Math.min(
+                                                    matrix[i - 1][j - 1] + 1,
+                                                    matrix[i][j - 1] + 1,
+                                                    matrix[i - 1][j] + 1
+                                                );
+                                            }
+                                        }
+                                    }
+                                    return matrix[b.length][a.length];
+                                };
+                                
+                                const distance = getDistance(str1, str2);
+                                const maxLength = Math.max(str1.length, str2.length);
+                                const similarity = ((maxLength - distance) / maxLength) * 100;
+                                return similarity;
                             };
                             
                             const normalizedInput = normalizeString(userInput);
                             const normalizedSentence = normalizeString(sentence);
+                            const similarity = calculateSimilarity(normalizedInput, normalizedSentence);
                             
-                            console.log('User input:', normalizedInput);
-                            console.log('Expected:', normalizedSentence);
-                            console.log('Match:', normalizedInput === normalizedSentence);
-                            
-                            if (normalizedInput === normalizedSentence) {
+                            // Pass if similarity >= 80%
+                            if (similarity >= 80) {
                                 // Correct! Show success animation
                                 const successMessage = document.getElementById('successMessage');
                                 const modalContent = modal.querySelector('.english-validation-content');
                                 const buttonsDiv = modal.querySelector('.buttons');
+                                
+                                // Update success message with score
+                                const similarityPercent = Math.round(similarity);
+                                if (similarityPercent >= 95) {
+                                    successMessage.textContent = `🌟 Perfect! ${similarityPercent}% - Amazing!`;
+                                } else if (similarityPercent >= 90) {
+                                    successMessage.textContent = `✅ Excellent! ${similarityPercent}% - Well done!`;
+                                } else {
+                                    successMessage.textContent = `✅ Good enough! ${similarityPercent}% - Passed!`;
+                                }
                                 
                                 // Hide error, input, and buttons
                                 errorMessage.style.display = 'none';
@@ -8351,7 +8478,21 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                     }
                                 }, 1000);
                             } else {
-                                // Incorrect, show error
+                                // Incorrect, show error with similarity percentage
+                                const similarityPercent = Math.round(similarity);
+                                let message = '';
+                                
+                                if (similarityPercent >= 70) {
+                                    message = `🔥 Almost there! ${similarityPercent}% - Keep going!`;
+                                } else if (similarityPercent >= 50) {
+                                    message = `😅 Getting closer! ${similarityPercent}% - Try harder!`;
+                                } else if (similarityPercent >= 30) {
+                                    message = `🤔 Hmm... ${similarityPercent}% - Check again!`;
+                                } else {
+                                    message = `❌ Too far! ${similarityPercent}% - Read carefully!`;
+                                }
+                                
+                                errorMessage.textContent = message;
                                 errorMessage.style.display = 'block';
                                 input.value = '';
                                 input.focus();

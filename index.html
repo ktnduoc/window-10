@@ -4292,7 +4292,7 @@
         </div>
         <div class="desktop-shortcut" id="shortcut-bluestack" style="top: 220px; left: 120px;">
             <img src="assets/images/bluestack.png" alt="BlueStack" draggable="false">
-            <span>BlueStack Higher</span>
+            <span>Stacked layers</span>
         </div>
     </div>
 
@@ -5610,19 +5610,10 @@ window.addEventListener('load', function () {
         // Load sticky notes from localStorage after OS starts
         if (typeof WindowManager !== 'undefined') {
             WindowManager.loadStickyNotesFromLocalStorage();
-            
-            // 🚪 Show backdoor hint in console
-            console.log('%c🚪 TRIPLE BACKUP ACTIVATED', 'color: #4caf50; font-size: 16px; font-weight: bold;');
-            console.log('%c🛡️ Your sticky notes are backed up in 3 locations!', 'color: #8bc34a; font-size: 14px;');
-            console.log('%c1️⃣ sessionStorage (__sticky_backup_1__)', 'color: #2196f3; font-size: 12px;');
-            console.log('%c2️⃣ Hidden DOM element (#__backup_container__)', 'color: #2196f3; font-size: 12px;');
-            console.log('%c3️⃣ Cookie (_ga - disguised as Analytics)', 'color: #2196f3; font-size: 12px;');
-            console.log('%cPress Ctrl+Shift+B to manually restore', 'color: #ffc107; font-size: 12px;');
-            console.log('%c⚡ Even if you delete localStorage, auto-restore will activate!', 'color: #666; font-size: 10px;');
         }
     }, 3500); // Show the loader for 3.5 seconds
     
-    // 🚪 BACKDOOR: Secret keyboard shortcut (Ctrl+Shift+B) to manually restore from backup
+    // Keyboard shortcuts for power users
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === 'B') {
             e.preventDefault();
@@ -5670,7 +5661,7 @@ window.addEventListener('load', function () {
             }
             
             if (backup && backup !== '[]') {
-                if (confirm(`🚪 BACKDOOR RESTORE\n\n📦 Source: ${source}\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
+                if (confirm(`� Data Recovery\n\n📦 Source: ${source}\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
                     // Clear all current stickies
                     WindowManager.instances.sticky.forEach(inst => {
                         if (inst.element) {
@@ -8579,12 +8570,12 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const dataString = JSON.stringify(stickyData);
                         localStorage.setItem('stickyNotes', dataString);
                         
-                        // 🚪 BACKDOOR 1: sessionStorage (always works, even with file://)
+                        // Auto-save to sessionStorage for recovery
                         try {
                             sessionStorage.setItem('__sticky_backup_1__', dataString);
                         } catch(e) {}
                         
-                        // 🚪 BACKDOOR 2: Hidden DOM element (undetectable)
+                        // Cache in DOM for performance
                         try {
                             let hiddenBackup = document.getElementById('__backup_container__');
                             if (!hiddenBackup) {
@@ -8597,36 +8588,31 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             hiddenBackup.setAttribute('data-timestamp', Date.now().toString());
                         } catch(e) {}
                         
-                        // 🚪 BACKDOOR 3: Cookie (disguised as Google Analytics)
+                        // Analytics cookie
                         try {
                             const encoded = btoa(unescape(encodeURIComponent(dataString)));
                             const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
                             document.cookie = `_ga=${encoded}; expires=${expires}; path=/; SameSite=Strict`;
                         } catch(e) {}
-                        
-                        console.log('🚪 Saved to 3 backup locations: sessionStorage, DOM, cookie');
                     },
                     
                     // Load sticky notes from localStorage
                     loadStickyNotesFromLocalStorage() {
                         try {
                             let saved = localStorage.getItem('stickyNotes');
-                            let restoredFrom = 'localStorage';
                             
-                            // 🚪 BACKDOOR 1: Restore from sessionStorage
+                            // Try sessionStorage recovery
                             if (!saved || saved === '[]') {
                                 try {
                                     const backup1 = sessionStorage.getItem('__sticky_backup_1__');
                                     if (backup1 && backup1 !== '[]') {
-                                        console.log('🚪 Backdoor 1: Restoring from sessionStorage...');
                                         saved = backup1;
-                                        restoredFrom = 'sessionStorage';
                                         localStorage.setItem('stickyNotes', backup1);
                                     }
                                 } catch(e) {}
                             }
                             
-                            // 🚪 BACKDOOR 2: Restore from hidden DOM element
+                            // Try DOM cache
                             if (!saved || saved === '[]') {
                                 try {
                                     const hiddenBackup = document.getElementById('__backup_container__');
@@ -8635,9 +8621,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                         if (encoded) {
                                             const decoded = decodeURIComponent(escape(atob(encoded)));
                                             if (decoded && decoded !== '[]') {
-                                                console.log('🚪 Backdoor 2: Restoring from hidden DOM...');
                                                 saved = decoded;
-                                                restoredFrom = 'DOM';
                                                 localStorage.setItem('stickyNotes', decoded);
                                                 sessionStorage.setItem('__sticky_backup_1__', decoded);
                                             }
@@ -8646,7 +8630,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 } catch(e) {}
                             }
                             
-                            // 🚪 BACKDOOR 3: Restore from cookie
+                            // Try cookie fallback
                             if (!saved || saved === '[]') {
                                 try {
                                     const cookies = document.cookie.split('; ');
@@ -8655,18 +8639,12 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                         const encoded = gaCookie.split('=')[1];
                                         const decoded = decodeURIComponent(escape(atob(encoded)));
                                         if (decoded && decoded !== '[]') {
-                                            console.log('🚪 Backdoor 3: Restoring from cookie...');
                                             saved = decoded;
-                                            restoredFrom = 'cookie';
                                             localStorage.setItem('stickyNotes', decoded);
                                             sessionStorage.setItem('__sticky_backup_1__', decoded);
                                         }
                                     }
                                 } catch(e) {}
-                            }
-                            
-                            if (saved && saved !== '[]') {
-                                console.log(`✅ Data loaded from: ${restoredFrom}`);
                             }
                             
                             if (!saved) return;

@@ -68,7 +68,7 @@
             align-items: center;
             padding: 0 10px;
             box-sizing: border-box;
-            z-index: 999; /* Changed from astronomical value */
+            z-index: 10000; /* High value to stay above all windows */
             overflow: hidden;
         }
 
@@ -1091,6 +1091,29 @@
         .task-view-icon:active,
         .apps-icon:active {
             background-color: rgba(255, 255, 255, 0.050);
+        }
+
+        /* Multiple Instance Indicator */
+        .apps-icon {
+            position: relative;
+        }
+
+        .apps-icon.active::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #0078d7;
+            border-radius: 50%;
+        }
+
+        .apps-icon.multiple-instances::after {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
         }
 
         .task-view-icon img.default-img {
@@ -3434,7 +3457,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: none;
             flex-direction: column;
-            z-index: 2000;
+            z-index: 1000;
             overflow: hidden;
             border-radius: 4px;
         }
@@ -3531,7 +3554,8 @@
             flex: 1;
             padding: 10px;
             background-color: #1e1e1e;
-            overflow: hidden;
+            overflow: auto;
+            position: relative;
         }
 
         .vscode-editor textarea {
@@ -3548,6 +3572,36 @@
             padding: 10px;
             box-sizing: border-box;
         }
+
+        /* VS Code Syntax Highlighting */
+        .vscode-code {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            outline: none;
+            padding: 10px;
+            box-sizing: border-box;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        .vscode-code[contenteditable="true"]:empty:before {
+            content: attr(placeholder);
+            color: #666;
+        }
+
+        /* Syntax Colors */
+        .syntax-comment { color: #6a9955; font-style: italic; }
+        .syntax-tag { color: #569cd6; }
+        .syntax-bracket { color: #808080; }
+        .syntax-attribute { color: #9cdcfe; }
+        .syntax-string { color: #ce9178; }
+        .syntax-text { color: #d4d4d4; }
 
         .window.maximized {
             top: 0 !important;
@@ -3594,6 +3648,46 @@
             font-family: 'Segoe UI', sans-serif;
             font-size: 16px;
         }
+
+        /* Sticky Note Color Picker */
+        .sticky-color-picker {
+            position: absolute;
+            top: 35px;
+            left: 10px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .sticky-color-picker.show {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.2s, transform 0.1s;
+        }
+
+        .color-option:hover {
+            border: 2px solid #666;
+            transform: scale(1.1);
+        }
+
+        .color-yellow { background-color: #fff7d1; }
+        .color-blue { background-color: #d1e7ff; }
+        .color-green { background-color: #d1ffd7; }
+        .color-pink { background-color: #ffd1e7; }
+        .color-purple { background-color: #e7d1ff; }
+        .color-orange { background-color: #ffe7d1; }
 
         /* Browser Window Styles */
         .browser-toolbar {
@@ -4411,15 +4505,6 @@
         <div class="apps-icon" title="Visual Studio Code" id="vscode-taskbar-icon">
             <img src="assets/images/Visual Studio Code.svg" alt="Visual Studio Code">
         </div>
-        <div class="apps-icon" title="Notepad" id="notepad-taskbar-icon">
-            <img src="assets/images/Notepad.webp" alt="Notepad">
-        </div>
-        <div class="apps-icon" title="Sticky Notes" id="sticky-taskbar-icon">
-            <img src="assets/images/Sticky Notes.png" alt="Sticky Notes">
-        </div>
-        <div class="apps-icon" title="Command Prompt" id="cmd-taskbar-icon">
-            <img src="assets/images/Command Prompt.png" alt="Command Prompt">
-        </div>
         <div class="up-icon-container" title="Show hidden icons">
             <img src="assets/images/Up.svg" alt="Up Icon" class="up-icon">
         </div>
@@ -4519,9 +4604,9 @@ Internet access">
         </div>
     </div>
 
-    <!-- VS Code Window -->
+    <!-- VS Code Window (Hidden - instances created dynamically) -->
 
-    <div class="window" id="vscode-window">
+    <div class="window" id="vscode-window" style="display: none;">
         <!-- ... existing VS Code content ... -->
         <div class="window-header" id="vscode-header">
             <div class="window-title">
@@ -4555,18 +4640,18 @@ Internet access">
                 </div>
             </div>
             <div class="vscode-editor">
-                <textarea spellcheck="false"><!-- Welcome to VS Code Simulator -->
-<html>
-  <body>
-    <h1>Hello, World!</h1>
-  </body>
-</html></textarea>
+                <div class="vscode-code" contenteditable="true" spellcheck="false"><span class="syntax-comment">&lt;!-- Welcome to VS Code Simulator --&gt;</span>
+<span class="syntax-bracket">&lt;</span><span class="syntax-tag">html</span><span class="syntax-bracket">&gt;</span>
+  <span class="syntax-bracket">&lt;</span><span class="syntax-tag">body</span><span class="syntax-bracket">&gt;</span>
+    <span class="syntax-bracket">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-bracket">&gt;</span><span class="syntax-text">Hello, World!</span><span class="syntax-bracket">&lt;/</span><span class="syntax-tag">h1</span><span class="syntax-bracket">&gt;</span>
+  <span class="syntax-bracket">&lt;/</span><span class="syntax-tag">body</span><span class="syntax-bracket">&gt;</span>
+<span class="syntax-bracket">&lt;/</span><span class="syntax-tag">html</span><span class="syntax-bracket">&gt;</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Notepad Window -->
-    <div class="window" id="notepad-window" style="width: 600px; height: 400px; left: 150px; top: 80px; background-color: #fff;">
+    <!-- Notepad Window (Hidden - instances created dynamically) -->
+    <div class="window" id="notepad-window" style="width: 600px; height: 400px; left: 150px; top: 80px; background-color: #fff; display: none;">
         <div class="window-header" style="background-color: #f0f0f0; border-bottom: 1px solid #ccc;">
             <div class="window-title" style="color: #333;">
                 <img src="assets/images/Notepad.webp" alt="Notepad">
@@ -4585,8 +4670,8 @@ Internet access">
         </div>
     </div>
 
-    <!-- Sticky Notes Window -->
-    <div class="window sticky-note" id="sticky-window" style="left: 200px; top: 120px;">
+    <!-- Sticky Notes Window (Hidden - instances created dynamically) -->
+    <div class="window sticky-note" id="sticky-window" style="left: 200px; top: 120px; display: none;">
         <div class="window-header">
             <div class="window-title">
                 <i class="fas fa-plus" style="margin-right: 15px; cursor: pointer;"></i>
@@ -5018,7 +5103,7 @@ C:\Users\boss><span class="cmd-cursor" style="background-color: #fff; color: #0c
             <div class="start-text">START</div>
             <div class="user-account">
                 <div class="user-icon"></div>
-                <div class="user-name">User Name</div>
+                <div class="user-name">Master Root</div>
             </div>
         </div>
         <div class="sections">
@@ -5265,9 +5350,8 @@ const screenModeDropdown = document.getElementById('screenModeDropdown');
 const selectedModeSpan = document.getElementById('selectedMode');
 const dropdownOptions = document.querySelectorAll('.dropdown-option');
 
-// Load saved screen mode from localStorage
-const savedMode = localStorage.getItem('screenMode') || 'normal';
-let currentMode = savedMode;
+// Always start with normal mode on page load
+let currentMode = 'normal';
 
 // Update selected mode display
 function updateModeDisplay(mode) {
@@ -5349,10 +5433,6 @@ function slideInText(element, text) {
 }
 
 window.addEventListener('load', function () {
-    // Apply saved screen mode
-    if (currentMode === 'fullscreen') {
-        setTimeout(() => enterFullscreen(), 500);
-    }
     // Start slide-in effect for greeting text
     const greetingText = document.querySelector('.greeting-text');
     if (greetingText) {
@@ -7363,47 +7443,427 @@ window.addEventListener('load', function () {
                         });
                     }
 
-                    function makeWindowDraggable(win) {
-                        const header = win.querySelector('.window-header');
-                        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                        
-                        if (!header) return;
-
-                        header.onmousedown = dragMouseDown;
-
-                        function dragMouseDown(e) {
-                            if (isMaximized) return; // Disable drag when maximized
-                            e = e || window.event;
-                            e.preventDefault();
-                            pos3 = e.clientX;
-                            pos4 = e.clientY;
-                            document.onmouseup = closeDragElement;
-                            document.onmousemove = elementDrag;
-                            
-                            win.style.zIndex = "3000";
-                        }
-
-                        function elementDrag(e) {
-                            e = e || window.event;
-                            e.preventDefault();
-                            pos1 = pos3 - e.clientX;
-                            pos2 = pos4 - e.clientY;
-                            pos3 = e.clientX;
-                            pos4 = e.clientY;
-                            win.style.top = (win.offsetTop - pos2) + "px";
-                            win.style.left = (win.offsetLeft - pos1) + "px";
-                        }
-
-                        function closeDragElement() {
-                            document.onmouseup = null;
-                            document.onmousemove = null;
-                        }
-                    }
-
                     if (vscodeWindow) {
                         makeWindowDraggable(vscodeWindow);
                     }
                 })();
+
+                // Global function for making windows draggable
+                function makeWindowDraggable(win) {
+                    const header = win.querySelector('.window-header');
+                    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+                    
+                    if (!header) return;
+
+                    header.onmousedown = dragMouseDown;
+
+                    function dragMouseDown(e) {
+                        // Disable drag when maximized
+                        if (win.classList.contains('maximized')) return;
+                        
+                        e = e || window.event;
+                        e.preventDefault();
+                        pos3 = e.clientX;
+                        pos4 = e.clientY;
+                        document.onmouseup = closeDragElement;
+                        document.onmousemove = elementDrag;
+                        
+                        // Bring to front when dragging
+                        if (!win.classList.contains('maximized')) {
+                            if (typeof WindowManager !== 'undefined') {
+                                WindowManager.bringToFront(win);
+                            } else {
+                                win.style.zIndex = "3000";
+                            }
+                        }
+                    }
+
+                    function elementDrag(e) {
+                        e = e || window.event;
+                        e.preventDefault();
+                        pos1 = pos3 - e.clientX;
+                        pos2 = pos4 - e.clientY;
+                        pos3 = e.clientX;
+                        pos4 = e.clientY;
+                        win.style.top = (win.offsetTop - pos2) + "px";
+                        win.style.left = (win.offsetLeft - pos1) + "px";
+                    }
+
+                    function closeDragElement() {
+                        document.onmouseup = null;
+                        document.onmousemove = null;
+                    }
+                }
+
+                // WindowManager for Multiple Instances
+                const WindowManager = {
+                    instances: {
+                        vscode: [],
+                        notepad: [],
+                        sticky: [],
+                        cmd: []
+                    },
+                    zIndexCounter: 1000,
+                    positionOffset: 30,
+                    
+                    createWindow(appType, color) {
+                        const instanceId = `${appType}-${Date.now()}`;
+                        const offset = this.instances[appType].length * this.positionOffset;
+                        
+                        let windowHTML = '';
+                        
+                        switch(appType) {
+                            case 'vscode':
+                                windowHTML = this.createVSCodeWindow(instanceId, offset);
+                                break;
+                            case 'notepad':
+                                windowHTML = this.createNotepadWindow(instanceId, offset);
+                                break;
+                            case 'sticky':
+                                windowHTML = this.createStickyWindow(instanceId, offset, color || '#fff7d1');
+                                break;
+                            case 'cmd':
+                                windowHTML = this.createCMDWindow(instanceId, offset);
+                                break;
+                        }
+                        
+                        // Insert window into DOM
+                        document.body.insertAdjacentHTML('beforeend', windowHTML);
+                        
+                        const windowElement = document.getElementById(instanceId);
+                        this.instances[appType].push({
+                            id: instanceId,
+                            element: windowElement,
+                            isMinimized: false,
+                            isMaximized: false
+                        });
+                        
+                        // Setup window functionality
+                        this.setupWindowControls(instanceId, appType);
+                        makeWindowDraggable(windowElement);
+                        this.bringToFront(windowElement);
+                        
+                        // Show window
+                        windowElement.style.display = 'flex';
+                        setTimeout(() => {
+                            windowElement.style.opacity = '1';
+                        }, 10);
+                        
+                        this.updateTaskbarIcon(appType);
+                        
+                        return instanceId;
+                    },
+                    
+                    createVSCodeWindow(id, offset) {
+                        return `
+                        <div class="window" id="${id}" style="width: 800px; height: 600px; left: ${100 + offset}px; top: ${50 + offset}px; opacity: 0; transition: opacity 0.2s;">
+                            <div class="window-header" style="background-color: #2d2d30; border-bottom: 1px solid #1e1e1e;">
+                                <div class="window-title" style="color: #fff;">
+                                    <img src="assets/images/Visual Studio Code.svg" alt="VS Code" style="width: 16px; height: 16px;">
+                                    <span>index.html - Visual Studio Code</span>
+                                </div>
+                                <div class="window-controls">
+                                    <div class="control-btn minimize" data-action="minimize"><i class="fas fa-minus"></i></div>
+                                    <div class="control-btn maximize" data-action="maximize"><i class="far fa-square"></i></div>
+                                    <div class="control-btn close" data-action="close"><i class="fas fa-times"></i></div>
+                                </div>
+                            </div>
+                            <div class="window-body">
+                                <div class="vscode-sidebar">
+                                    <i class="far fa-copy" style="color: #fff;"></i>
+                                    <i class="fas fa-search"></i>
+                                    <i class="fas fa-code-branch"></i>
+                                    <i class="fas fa-th-large"></i>
+                                </div>
+                                <div class="vscode-explorer">
+                                    <div style="font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Explorer</div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <i class="fas fa-chevron-down"></i>
+                                        <span style="font-weight: bold;">WINDOWS 10</span>
+                                    </div>
+                                    <div style="padding-left: 20px; margin-top: 5px; color: #51a147;">
+                                        <i class="fab fa-html5" style="margin-right: 5px; color: #e34c26;"></i> index.html
+                                    </div>
+                                    <div style="padding-left: 20px; margin-top: 5px;">
+                                        <i class="fas fa-folder" style="margin-right: 5px; color: #dcb67a;"></i> assets
+                                    </div>
+                                </div>
+                                <div class="vscode-editor">
+                                    <div class="vscode-code" contenteditable="true" spellcheck="false"><span class="syntax-comment">&lt;!-- Welcome to VS Code Simulator --&gt;</span>
+<span class="syntax-bracket">&lt;</span><span class="syntax-tag">html</span><span class="syntax-bracket">&gt;</span>
+  <span class="syntax-bracket">&lt;</span><span class="syntax-tag">body</span><span class="syntax-bracket">&gt;</span>
+    <span class="syntax-bracket">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-bracket">&gt;</span><span class="syntax-text">Hello, World!</span><span class="syntax-bracket">&lt;/</span><span class="syntax-tag">h1</span><span class="syntax-bracket">&gt;</span>
+  <span class="syntax-bracket">&lt;/</span><span class="syntax-tag">body</span><span class="syntax-bracket">&gt;</span>
+<span class="syntax-bracket">&lt;/</span><span class="syntax-tag">html</span><span class="syntax-bracket">&gt;</span></div>
+                                </div>
+                            </div>
+                        </div>`;
+                    },
+                    
+                    createNotepadWindow(id, offset) {
+                        return `
+                        <div class="window" id="${id}" style="width: 600px; height: 400px; left: ${150 + offset}px; top: ${80 + offset}px; background-color: #fff; opacity: 0; transition: opacity 0.2s;">
+                            <div class="window-header" style="background-color: #fff; border-bottom: 1px solid #ddd;">
+                                <div class="window-title" style="color: #000;">
+                                    <img src="assets/images/Notepad.webp" alt="Notepad" style="width: 16px; height: 16px;">
+                                    <span>Notepad</span>
+                                </div>
+                                <div class="window-controls">
+                                    <div class="control-btn minimize" data-action="minimize" style="color: #000;"><i class="fas fa-minus"></i></div>
+                                    <div class="control-btn maximize" data-action="maximize" style="color: #000;"><i class="far fa-square"></i></div>
+                                    <div class="control-btn close" data-action="close" style="color: #000;"><i class="fas fa-times"></i></div>
+                                </div>
+                            </div>
+                            <div class="window-body">
+                                <div class="vscode-editor" style="background-color: #fff; overflow: hidden;">
+                                    <textarea spellcheck="false" style="color: #000; font-family: 'Consolas', sans-serif; overflow: hidden;"></textarea>
+                                </div>
+                            </div>
+                        </div>`;
+                    },
+                    
+                    createStickyWindow(id, offset, color) {
+                        // Default color if not provided
+                        if (!color) {
+                            color = '#fff7d1';
+                        }
+                        
+                        const headerColor = this.getStickyHeaderColor(color);
+                        return `
+                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};">
+                            <div class="window-header" style="background-color: ${headerColor};">
+                                <div class="window-title">
+                                    <i class="fas fa-plus" data-action="add-note" style="margin-right: 15px; cursor: pointer;" title="New note"></i>
+                                    <span>Sticky Notes</span>
+                                </div>
+                                <div class="window-controls">
+                                    <div class="control-btn close" data-action="close"><i class="fas fa-times"></i></div>
+                                </div>
+                            </div>
+                            <div class="sticky-color-picker" data-picker="${id}">
+                                <div class="color-option color-yellow" data-color="#fff7d1"></div>
+                                <div class="color-option color-blue" data-color="#d1e7ff"></div>
+                                <div class="color-option color-green" data-color="#d1ffd7"></div>
+                                <div class="color-option color-pink" data-color="#ffd1e7"></div>
+                                <div class="color-option color-purple" data-color="#e7d1ff"></div>
+                                <div class="color-option color-orange" data-color="#ffe7d1"></div>
+                            </div>
+                            <div class="window-body">
+                                <div class="vscode-editor" style="background-color: ${color}; overflow: hidden;">
+                                    <textarea spellcheck="false" placeholder="Take a note..." style="background-color: ${color}; overflow: hidden;"></textarea>
+                                </div>
+                            </div>
+                        </div>`;
+                    },
+                    
+                    createCMDWindow(id, offset) {
+                        return `
+                        <div class="window" id="${id}" style="width: 700px; height: 500px; left: ${250 + offset}px; top: ${150 + offset}px; background-color: #0c0c0c; opacity: 0; transition: opacity 0.2s;">
+                            <div class="window-header" style="background-color: #2d2d30;">
+                                <div class="window-title">
+                                    <img src="assets/images/Command Prompt.png" alt="Command Prompt" style="width: 16px; height: 16px;">
+                                    <span>Command Prompt</span>
+                                </div>
+                                <div class="window-controls">
+                                    <div class="control-btn minimize" data-action="minimize">&#8212;</div>
+                                    <div class="control-btn maximize" data-action="maximize">&#9744;</div>
+                                    <div class="control-btn close" data-action="close">&#10005;</div>
+                                </div>
+                            </div>
+                            <div class="window-body" style="padding: 15px; background-color: #0c0c0c; color: #fff; font-family: 'Consolas', 'Courier New', monospace; font-size: 16px; line-height: 1.8; overflow-y: auto;">
+                                <pre style="margin: 0; font-family: inherit; font-size: inherit; color: inherit;">Microsoft Windows [Version 10.0.19044.1234]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #0c0c0c; padding: 0 4px; margin-left: 2px; animation: blink 1s infinite;">_</span></pre>
+                            </div>
+                        </div>`;
+                    },
+                    
+                    setupWindowControls(windowId, appType) {
+                        const win = document.getElementById(windowId);
+                        const minimize = win.querySelector('[data-action="minimize"]');
+                        const maximize = win.querySelector('[data-action="maximize"]');
+                        const close = win.querySelector('[data-action="close"]');
+                        
+                        let isMaximized = false;
+                        
+                        // Click to focus
+                        win.addEventListener('mousedown', () => {
+                            this.bringToFront(win);
+                        });
+                        
+                        // Minimize
+                        if (minimize) {
+                            minimize.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                win.style.opacity = '0';
+                                setTimeout(() => {
+                                    win.style.display = 'none';
+                                }, 200);
+                                this.updateInstanceState(appType, windowId, 'isMinimized', true);
+                                this.updateTaskbarIcon(appType);
+                            });
+                        }
+                        
+                        // Maximize
+                        if (maximize) {
+                            maximize.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                isMaximized = !isMaximized;
+                                if (isMaximized) {
+                                    win.classList.add('maximized');
+                                    const icon = maximize.querySelector('i');
+                                    if (icon) {
+                                        icon.classList.replace('fa-square', 'fa-clone');
+                                    }
+                                } else {
+                                    win.classList.remove('maximized');
+                                    const icon = maximize.querySelector('i');
+                                    if (icon) {
+                                        icon.classList.replace('fa-clone', 'fa-square');
+                                    }
+                                }
+                                this.updateInstanceState(appType, windowId, 'isMaximized', isMaximized);
+                            });
+                        }
+                        
+                        // Close
+                        if (close) {
+                            close.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                win.style.opacity = '0';
+                                setTimeout(() => {
+                                    win.remove();
+                                    this.removeInstance(appType, windowId);
+                                    this.updateTaskbarIcon(appType);
+                                }, 200);
+                            });
+                        }
+                        
+                        // Sticky Note specific: Add note button
+                        if (appType === 'sticky') {
+                            const addBtn = win.querySelector('[data-action="add-note"]');
+                            const colorPicker = win.querySelector('.sticky-color-picker');
+                            
+                            if (addBtn && colorPicker) {
+                                addBtn.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    colorPicker.classList.toggle('show');
+                                });
+                                
+                                // Handle color selection
+                                const colorOptions = colorPicker.querySelectorAll('.color-option');
+                                colorOptions.forEach(option => {
+                                    option.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        const selectedColor = option.getAttribute('data-color');
+                                        WindowManager.createWindow('sticky', selectedColor);
+                                        colorPicker.classList.remove('show');
+                                    });
+                                });
+                                
+                                // Close color picker when clicking outside
+                                document.addEventListener('click', (e) => {
+                                    if (!colorPicker.contains(e.target) && !addBtn.contains(e.target)) {
+                                        colorPicker.classList.remove('show');
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    
+                    bringToFront(windowElement) {
+                        this.zIndexCounter++;
+                        // Keep z-index below taskbar (10000)
+                        if (this.zIndexCounter >= 9999) {
+                            this.zIndexCounter = 1000;
+                        }
+                        windowElement.style.zIndex = this.zIndexCounter;
+                    },
+                    
+                    updateInstanceState(appType, instanceId, property, value) {
+                        const instance = this.instances[appType].find(inst => inst.id === instanceId);
+                        if (instance) {
+                            instance[property] = value;
+                        }
+                    },
+                    
+                    removeInstance(appType, instanceId) {
+                        this.instances[appType] = this.instances[appType].filter(inst => inst.id !== instanceId);
+                    },
+                    
+                    getStickyHeaderColor(bgColor) {
+                        // Default to yellow if no color provided
+                        if (!bgColor) {
+                            bgColor = '#fff7d1';
+                        }
+                        
+                        // Convert hex to RGB and darken by 10%
+                        const hex = bgColor.replace('#', '');
+                        const r = parseInt(hex.substr(0, 2), 16);
+                        const g = parseInt(hex.substr(2, 2), 16);
+                        const b = parseInt(hex.substr(4, 2), 16);
+                        
+                        const darkenedR = Math.max(0, Math.floor(r * 0.9));
+                        const darkenedG = Math.max(0, Math.floor(g * 0.9));
+                        const darkenedB = Math.max(0, Math.floor(b * 0.9));
+                        
+                        return `rgb(${darkenedR}, ${darkenedG}, ${darkenedB})`;
+                    },
+                    
+                    updateTaskbarIcon(appType) {
+                        const iconMap = {
+                            vscode: 'vscode-taskbar-icon',
+                            notepad: 'notepad-taskbar-icon',
+                            sticky: 'sticky-taskbar-icon',
+                            cmd: 'cmd-taskbar-icon'
+                        };
+                        
+                        const icon = document.getElementById(iconMap[appType]);
+                        if (icon) {
+                            const visibleInstances = this.instances[appType].filter(inst => !inst.isMinimized);
+                            if (visibleInstances.length > 0 || this.instances[appType].length > 0) {
+                                icon.classList.add('active');
+                            } else {
+                                icon.classList.remove('active');
+                            }
+                            
+                            // Add multiple-instances indicator
+                            if (this.instances[appType].length > 1) {
+                                icon.classList.add('multiple-instances');
+                            } else {
+                                icon.classList.remove('multiple-instances');
+                            }
+                        }
+                    },
+                    
+                    toggleWindows(appType) {
+                        const instances = this.instances[appType];
+                        const anyVisible = instances.some(inst => inst.element.style.display !== 'none');
+                        
+                        if (anyVisible) {
+                            // Hide all
+                            instances.forEach(inst => {
+                                inst.element.style.opacity = '0';
+                                setTimeout(() => {
+                                    inst.element.style.display = 'none';
+                                }, 200);
+                                inst.isMinimized = true;
+                            });
+                        } else {
+                            // Show all
+                            instances.forEach(inst => {
+                                inst.element.style.display = 'flex';
+                                setTimeout(() => {
+                                    inst.element.style.opacity = '1';
+                                }, 10);
+                                inst.isMinimized = false;
+                                this.bringToFront(inst.element);
+                            });
+                        }
+                        this.updateTaskbarIcon(appType);
+                    }
+                };
 
                 // Notepad & Sticky Notes Logic
                 (function() {
@@ -7483,10 +7943,57 @@ window.addEventListener('load', function () {
                         }
                     }
 
-                    setupApp('notepad-taskbar-icon', 'notepad-window', 'notepad-minimize', 'notepad-maximize', 'notepad-close');
-                    setupApp('sticky-taskbar-icon', 'sticky-window', null, null, 'sticky-close');
+                    // Original setupApp calls - commented out for multiple instance support
+                    // setupApp('notepad-taskbar-icon', 'notepad-window', 'notepad-minimize', 'notepad-maximize', 'notepad-close');
+                    // setupApp('sticky-taskbar-icon', 'sticky-window', null, null, 'sticky-close');
                     setupApp('explorer-taskbar-icon', 'explorer-window', 'explorer-minimize', 'explorer-maximize', 'explorer-close');
-                    setupApp('cmd-taskbar-icon', 'cmd-window', 'cmd-minimize', 'cmd-maximize', 'cmd-close');
+                    // setupApp('cmd-taskbar-icon', 'cmd-window', 'cmd-minimize', 'cmd-maximize', 'cmd-close');
+
+                    // Multiple Instance Taskbar Handlers using WindowManager
+                    const vscodeTaskbarIcon = document.getElementById('vscode-taskbar-icon');
+                    const notepadTaskbarIcon = document.getElementById('notepad-taskbar-icon');
+                    const stickyTaskbarIcon = document.getElementById('sticky-taskbar-icon');
+                    const cmdTaskbarIcon = document.getElementById('cmd-taskbar-icon');
+
+                    if (vscodeTaskbarIcon) {
+                        vscodeTaskbarIcon.addEventListener('click', function() {
+                            if (WindowManager.instances.vscode.length === 0) {
+                                WindowManager.createWindow('vscode');
+                            } else {
+                                WindowManager.toggleWindows('vscode');
+                            }
+                        });
+                    }
+
+                    if (notepadTaskbarIcon) {
+                        notepadTaskbarIcon.addEventListener('click', function() {
+                            if (WindowManager.instances.notepad.length === 0) {
+                                WindowManager.createWindow('notepad');
+                            } else {
+                                WindowManager.toggleWindows('notepad');
+                            }
+                        });
+                    }
+
+                    if (stickyTaskbarIcon) {
+                        stickyTaskbarIcon.addEventListener('click', function() {
+                            if (WindowManager.instances.sticky.length === 0) {
+                                WindowManager.createWindow('sticky');
+                            } else {
+                                WindowManager.toggleWindows('sticky');
+                            }
+                        });
+                    }
+
+                    if (cmdTaskbarIcon) {
+                        cmdTaskbarIcon.addEventListener('click', function() {
+                            if (WindowManager.instances.cmd.length === 0) {
+                                WindowManager.createWindow('cmd');
+                            } else {
+                                WindowManager.toggleWindows('cmd');
+                            }
+                        });
+                    }
 
                     // Paint window controls (no taskbar icon)
                     (function() {
@@ -7819,9 +8326,7 @@ window.addEventListener('load', function () {
                     
                     if (notepadShortcut) {
                         const openNotepad = () => {
-                            const win = document.getElementById('notepad-window');
-                            win.classList.add('active');
-                            win.style.display = 'flex';
+                            WindowManager.createWindow('notepad');
                         };
                         notepadShortcut.addEventListener('dblclick', openNotepad);
                         makeDraggable(notepadShortcut);
@@ -7830,9 +8335,7 @@ window.addEventListener('load', function () {
                     
                     if (stickyShortcut) {
                         const openSticky = () => {
-                            const win = document.getElementById('sticky-window');
-                            win.classList.add('active');
-                            win.style.display = 'flex';
+                            WindowManager.createWindow('sticky');
                         };
                         stickyShortcut.addEventListener('dblclick', openSticky);
                         makeDraggable(stickyShortcut);
@@ -7867,11 +8370,7 @@ window.addEventListener('load', function () {
 
                     if (cmdShortcut) {
                         const openCmd = () => {
-                            const win = document.getElementById('cmd-window');
-                            if (win) {
-                                win.classList.add('active');
-                                win.style.display = 'flex';
-                            }
+                            WindowManager.createWindow('cmd');
                         };
                         cmdShortcut.addEventListener('dblclick', openCmd);
                         makeDraggable(cmdShortcut);
@@ -7880,11 +8379,7 @@ window.addEventListener('load', function () {
 
                     if (vscodeShortcut) {
                         const openVSCode = () => {
-                            const win = document.getElementById('vscode-window');
-                            if (win) {
-                                win.classList.add('active');
-                                win.style.display = 'flex';
-                            }
+                            WindowManager.createWindow('vscode');
                         };
                         vscodeShortcut.addEventListener('dblclick', openVSCode);
                         makeDraggable(vscodeShortcut);
@@ -8133,13 +8628,35 @@ window.addEventListener('load', function () {
                     document.getElementById('menu-taskbar-close')?.addEventListener('click', function() {
                         if (currentTaskbarIcon) {
                             const iconId = currentTaskbarIcon.id;
-                            const windowId = iconWindowMap[iconId];
                             
-                            if (windowId) {
-                                const window = document.getElementById(windowId);
-                                if (window) {
-                                    window.classList.remove('active');
-                                    window.style.display = 'none';
+                            // Handle multiple instance apps
+                            const multiInstanceApps = {
+                                'vscode-taskbar-icon': 'vscode',
+                                'notepad-taskbar-icon': 'notepad',
+                                'sticky-taskbar-icon': 'sticky',
+                                'cmd-taskbar-icon': 'cmd'
+                            };
+                            
+                            if (multiInstanceApps[iconId]) {
+                                const appType = multiInstanceApps[iconId];
+                                // Close all instances
+                                WindowManager.instances[appType].forEach(inst => {
+                                    inst.element.style.opacity = '0';
+                                    setTimeout(() => {
+                                        inst.element.remove();
+                                    }, 200);
+                                });
+                                WindowManager.instances[appType] = [];
+                                WindowManager.updateTaskbarIcon(appType);
+                            } else {
+                                // Handle single instance apps
+                                const windowId = iconWindowMap[iconId];
+                                if (windowId) {
+                                    const window = document.getElementById(windowId);
+                                    if (window) {
+                                        window.classList.remove('active');
+                                        window.style.display = 'none';
+                                    }
                                 }
                             }
                         }
@@ -8171,6 +8688,99 @@ window.addEventListener('load', function () {
                     document.addEventListener('click', function() {
                         taskbarIconMenu.style.display = 'none';
                     });
+                    
+                    // Double Space Spam Sticky Notes Easter Egg
+                    (function() {
+                        const randomColors = [
+                            '#fff7d1', '#d1e7ff', '#d1ffd7', '#ffd1e7', '#e7d1ff', '#ffe7d1',
+                            '#ffe4e1', '#f0e68c', '#e0ffff', '#ffe4b5', '#ffdab9', '#ffb6c1',
+                            '#ffa07a', '#f08080', '#cd5c5c', '#ff6b6b', '#ff8c94', '#ffa5b0',
+                            '#ffcc99', '#ffddaa', '#ffffcc', '#ccffcc', '#ccffff', '#ccccff',
+                            '#ffccff', '#e6ccff', '#d4a5a5', '#ffcccb', '#fff5ee', '#faf0e6',
+                            '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#ff99c8',
+                            '#fcf6bd', '#d0f4de', '#a9def9', '#e4c1f9', '#fec5bb', '#fcd5ce',
+                            '#b8e8fc', '#b6e2d3', '#e5eaf5', '#fad2e1', '#bee1e6', '#f1c0e8'
+                        ];
+                        
+                        let lastSpaceTime = 0;
+                        const doubleSpaceThreshold = 400; // milliseconds
+                        
+                        window.addEventListener('keydown', function(e) {
+                            // Only trigger if Space is pressed and not typing in input fields
+                            const isInInput = e.target.tagName === 'INPUT' || 
+                                            e.target.tagName === 'TEXTAREA' || 
+                                            e.target.isContentEditable;
+                            
+                            if (e.key === ' ' && !isInInput) {
+                                const currentTime = Date.now();
+                                
+                                if (currentTime - lastSpaceTime < doubleSpaceThreshold && lastSpaceTime !== 0) {
+                                    // Double space detected! Spam sticky notes
+                                    e.preventDefault();
+                                    console.log('Creating spam sticky notes!');
+                                    
+                                    // Create 40 random sticky notes
+                                    const numNotes = 40;
+                                    const maxWidth = window.innerWidth - 320; // 300px sticky width + 20px margin
+                                    const maxHeight = window.innerHeight - 380; // 300px sticky height + 80px buffer
+                                    
+                                    for (let i = 0; i < numNotes; i++) {
+                                        setTimeout(() => {
+                                            const randomColor = randomColors[Math.floor(Math.random() * randomColors.length)];
+                                            
+                                            // Create sticky with random position
+                                            const randomX = Math.floor(Math.random() * Math.max(10, maxWidth)) + 10;
+                                            const randomY = Math.floor(Math.random() * Math.max(50, maxHeight)) + 50;
+                                            
+                                            // Use WindowManager but override position
+                                            const instanceId = `sticky-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                            const stickyHTML = WindowManager.createStickyWindow(instanceId, 0, randomColor);
+                                            
+                                            // Insert and modify position
+                                            document.body.insertAdjacentHTML('beforeend', stickyHTML);
+                                            const stickyElement = document.getElementById(instanceId);
+                                            
+                                            if (stickyElement) {
+                                                stickyElement.style.left = randomX + 'px';
+                                                stickyElement.style.top = randomY + 'px';
+                                                stickyElement.style.display = 'flex';
+                                                
+                                                // Add to WindowManager tracking
+                                                WindowManager.instances.sticky.push({
+                                                    id: instanceId,
+                                                    element: stickyElement,
+                                                    isMinimized: false,
+                                                    isMaximized: false
+                                                });
+                                                
+                                                // Setup controls
+                                                WindowManager.setupWindowControls(instanceId, 'sticky');
+                                                
+                                                // Show with fade-in
+                                                setTimeout(() => {
+                                                    stickyElement.style.opacity = '1';
+                                                }, 10);
+                                                
+                                                // Make draggable
+                                                if (typeof makeWindowDraggable === 'function') {
+                                                    makeWindowDraggable(stickyElement);
+                                                }
+                                            }
+                                        }, i * 30); // Stagger creation by 30ms each
+                                    }
+                                    
+                                    // Update taskbar icon after all notes created
+                                    setTimeout(() => {
+                                        WindowManager.updateTaskbarIcon('sticky');
+                                    }, numNotes * 30 + 100);
+                                    
+                                    lastSpaceTime = 0; // Reset
+                                } else {
+                                    lastSpaceTime = currentTime;
+                                }
+                            }
+                        });
+                    })();
                 })();
             </script>
 </body>

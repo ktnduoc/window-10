@@ -620,7 +620,8 @@
             color: #333;
             border-radius: 5px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-            z-index: 10000;
+            z-index: 15000;
+            margin-bottom: 30px !important;
             font-size: 12px;
             white-space: nowrap;
             width: 200px;
@@ -4151,6 +4152,10 @@
             <img src="assets/images/Paint.png" alt="Paint" draggable="false">
             <span>Paint</span>
         </div>
+        <div class="desktop-shortcut" id="shortcut-bluestack" style="top: 220px; left: 120px;">
+            <img src="assets/images/bluestack.png" alt="BlueStack" draggable="false">
+            <span>BlueStack Higher</span>
+        </div>
     </div>
 
     <div class="search-panel">
@@ -4504,6 +4509,24 @@
         </div>
         <div class="apps-icon" title="Visual Studio Code" id="vscode-taskbar-icon">
             <img src="assets/images/Visual Studio Code.svg" alt="Visual Studio Code">
+        </div>
+        <div class="apps-icon" title="Notepad" id="notepad-taskbar-icon" style="display: none;">
+            <img src="assets/images/Notepad.webp" alt="Notepad">
+        </div>
+        <div class="apps-icon" title="Sticky Notes" id="sticky-taskbar-icon" style="display: none;">
+            <img src="assets/images/Sticky Notes.png" alt="Sticky Notes">
+        </div>
+        <div class="apps-icon" title="Command Prompt" id="cmd-taskbar-icon" style="display: none;">
+            <img src="assets/images/Command Prompt.png" alt="Command Prompt">
+        </div>
+        <div class="apps-icon" title="Paint" id="paint-taskbar-icon" style="display: none;">
+            <img src="assets/images/Paint.png" alt="Paint">
+        </div>
+        <div class="apps-icon" title="File Explorer" id="explorer-taskbar-icon" style="display: none;">
+            <img src="assets/images/File Explorer.png" alt="File Explorer">
+        </div>
+        <div class="apps-icon" title="BlueStack Higher" id="bluestack-taskbar-icon" style="display: none;">
+            <img src="assets/images/bluestack.png" alt="BlueStack">
         </div>
         <div class="up-icon-container" title="Show hidden icons">
             <img src="assets/images/Up.svg" alt="Up Icon" class="up-icon">
@@ -5445,6 +5468,11 @@ window.addEventListener('load', function () {
         document.getElementById('loaderContainer').style.display = 'none';
         document.querySelector('.background-image').style.display = 'block';
         document.querySelector('.taskbar').style.display = 'flex';
+        
+        // Load sticky notes from localStorage after OS starts
+        if (typeof WindowManager !== 'undefined') {
+            WindowManager.loadStickyNotesFromLocalStorage();
+        }
     }, 3500); // Show the loader for 3.5 seconds
 
     // Create the selection box element only once
@@ -5559,7 +5587,7 @@ window.addEventListener('load', function () {
                         }
 
                         if (menuY + contextMenuHeight > taskbarRect.top) {
-                            menuY = taskbarRect.top - contextMenuHeight;
+                            menuY = taskbarRect.top - contextMenuHeight - 10;
                         }
 
                         contextMenu.style.left = `${menuX}px`;
@@ -6033,7 +6061,7 @@ window.addEventListener('load', function () {
                         e.preventDefault();
                         if (e.target.classList.contains('taskbar')) {
                             let menuX = e.pageX;
-                            let menuY = e.pageY - contextMenu.offsetHeight; // Position above the taskbar
+                            let menuY = e.pageY - contextMenu.offsetHeight - 10; // Position above the taskbar with extra spacing
 
                             const viewportWidth = window.innerWidth;
                             const contextMenuWidth = contextMenu.offsetWidth;
@@ -7492,6 +7520,11 @@ window.addEventListener('load', function () {
                     function closeDragElement() {
                         document.onmouseup = null;
                         document.onmousemove = null;
+                        
+                        // Save sticky notes position to localStorage if it's a sticky note
+                        if (win.classList.contains('sticky-note') && typeof WindowManager !== 'undefined') {
+                            WindowManager.saveStickyNotesToLocalStorage();
+                        }
                     }
                 }
 
@@ -7505,6 +7538,17 @@ window.addEventListener('load', function () {
                     },
                     zIndexCounter: 1000,
                     positionOffset: 30,
+                    
+                    // Play sound when creating sticky note
+                    playStickySound() {
+                        try {
+                            const audio = new Audio('assets/audio/Background Error.mp3');
+                            audio.volume = 0.3; // Set volume to 30%
+                            audio.play().catch(e => console.log('Audio play failed:', e));
+                        } catch (e) {
+                            console.log('Audio error:', e);
+                        }
+                    },
                     
                     createWindow(appType, color) {
                         const instanceId = `${appType}-${Date.now()}`;
@@ -7550,6 +7594,23 @@ window.addEventListener('load', function () {
                         }, 10);
                         
                         this.updateTaskbarIcon(appType);
+                        
+                        // Save to localStorage if sticky note
+                        if (appType === 'sticky') {
+                            // Play sound
+                            this.playStickySound();
+                            
+                            // Add event listener to save on content change
+                            setTimeout(() => {
+                                const textarea = windowElement.querySelector('textarea');
+                                if (textarea) {
+                                    textarea.addEventListener('input', () => {
+                                        this.saveStickyNotesToLocalStorage();
+                                    });
+                                }
+                            }, 100);
+                            this.saveStickyNotesToLocalStorage();
+                        }
                         
                         return instanceId;
                     },
@@ -7630,7 +7691,7 @@ window.addEventListener('load', function () {
                         
                         const headerColor = this.getStickyHeaderColor(color);
                         return `
-                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};">
+                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};" data-sticky-color="${color}">
                             <div class="window-header" style="background-color: ${headerColor};">
                                 <div class="window-title">
                                     <i class="fas fa-plus" data-action="add-note" style="margin-right: 15px; cursor: pointer;" title="New note"></i>
@@ -7790,6 +7851,11 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                     
                     removeInstance(appType, instanceId) {
                         this.instances[appType] = this.instances[appType].filter(inst => inst.id !== instanceId);
+                        
+                        // Save to localStorage if sticky note
+                        if (appType === 'sticky') {
+                            this.saveStickyNotesToLocalStorage();
+                        }
                     },
                     
                     getStickyHeaderColor(bgColor) {
@@ -7798,11 +7864,26 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             bgColor = '#fff7d1';
                         }
                         
-                        // Convert hex to RGB and darken by 10%
-                        const hex = bgColor.replace('#', '');
-                        const r = parseInt(hex.substr(0, 2), 16);
-                        const g = parseInt(hex.substr(2, 2), 16);
-                        const b = parseInt(hex.substr(4, 2), 16);
+                        let r, g, b;
+                        
+                        // Check if color is in rgb() format
+                        if (bgColor.startsWith('rgb')) {
+                            const matches = bgColor.match(/\d+/g);
+                            if (matches && matches.length >= 3) {
+                                r = parseInt(matches[0]);
+                                g = parseInt(matches[1]);
+                                b = parseInt(matches[2]);
+                            } else {
+                                // Fallback to default
+                                return 'rgb(230, 222, 188)';
+                            }
+                        } else {
+                            // Convert hex to RGB and darken by 10%
+                            const hex = bgColor.replace('#', '');
+                            r = parseInt(hex.substr(0, 2), 16);
+                            g = parseInt(hex.substr(2, 2), 16);
+                            b = parseInt(hex.substr(4, 2), 16);
+                        }
                         
                         const darkenedR = Math.max(0, Math.floor(r * 0.9));
                         const darkenedG = Math.max(0, Math.floor(g * 0.9));
@@ -7821,24 +7902,94 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         
                         const icon = document.getElementById(iconMap[appType]);
                         if (icon) {
-                            const visibleInstances = this.instances[appType].filter(inst => !inst.isMinimized);
-                            if (visibleInstances.length > 0 || this.instances[appType].length > 0) {
-                                icon.classList.add('active');
+                            // For sticky notes, only show icon if there are regular sticky notes (not from BlueStack)
+                            if (appType === 'sticky') {
+                                const regularStickies = this.instances.sticky.filter(inst => !inst.fromBluestack);
+                                
+                                if (regularStickies.length === 0) {
+                                    // No regular sticky notes, hide icon
+                                    icon.style.display = 'none';
+                                    icon.classList.remove('active');
+                                    return;
+                                }
+                                
+                                // Show icon on taskbar if hidden
+                                if (icon.style.display === 'none') {
+                                    icon.style.display = '';
+                                }
+                                
+                                const visibleRegularStickies = regularStickies.filter(inst => !inst.isMinimized);
+                                if (visibleRegularStickies.length > 0 || regularStickies.length > 0) {
+                                    icon.classList.add('active');
+                                } else {
+                                    icon.classList.remove('active');
+                                }
+                                
+                                // Add multiple-instances indicator
+                                if (regularStickies.length > 1) {
+                                    icon.classList.add('multiple-instances');
+                                } else {
+                                    icon.classList.remove('multiple-instances');
+                                }
                             } else {
-                                icon.classList.remove('active');
+                                // For other app types, use normal logic
+                                // Show icon on taskbar if hidden
+                                if (icon.style.display === 'none') {
+                                    icon.style.display = '';
+                                }
+                                
+                                const visibleInstances = this.instances[appType].filter(inst => !inst.isMinimized);
+                                if (visibleInstances.length > 0 || this.instances[appType].length > 0) {
+                                    icon.classList.add('active');
+                                } else {
+                                    icon.classList.remove('active');
+                                }
+                                
+                                // Add multiple-instances indicator
+                                if (this.instances[appType].length > 1) {
+                                    icon.classList.add('multiple-instances');
+                                } else {
+                                    icon.classList.remove('multiple-instances');
+                                }
                             }
+                        }
+                        
+                        // Update BlueStack icon separately
+                        if (appType === 'sticky') {
+                            const bluestackIcon = document.getElementById('bluestack-taskbar-icon');
+                            const bluestackStickies = this.instances.sticky.filter(inst => inst.fromBluestack);
                             
-                            // Add multiple-instances indicator
-                            if (this.instances[appType].length > 1) {
-                                icon.classList.add('multiple-instances');
+                            if (bluestackStickies.length === 0) {
+                                // No BlueStack stickies, hide icon
+                                if (bluestackIcon) {
+                                    bluestackIcon.style.display = 'none';
+                                    bluestackIcon.classList.remove('active');
+                                }
                             } else {
-                                icon.classList.remove('multiple-instances');
+                                // Has BlueStack stickies, show and update icon
+                                if (bluestackIcon) {
+                                    if (bluestackIcon.style.display === 'none') {
+                                        bluestackIcon.style.display = '';
+                                    }
+                                    
+                                    const visibleBluestackStickies = bluestackStickies.filter(inst => !inst.isMinimized);
+                                    if (visibleBluestackStickies.length > 0) {
+                                        bluestackIcon.classList.add('active');
+                                    } else {
+                                        bluestackIcon.classList.remove('active');
+                                    }
+                                }
                             }
                         }
                     },
                     
                     toggleWindows(appType) {
-                        const instances = this.instances[appType];
+                        // For sticky notes, only toggle regular ones (not from BlueStack)
+                        let instances = this.instances[appType];
+                        if (appType === 'sticky') {
+                            instances = instances.filter(inst => !inst.fromBluestack);
+                        }
+                        
                         const anyVisible = instances.some(inst => inst.element.style.display !== 'none');
                         
                         if (anyVisible) {
@@ -7862,11 +8013,114 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             });
                         }
                         this.updateTaskbarIcon(appType);
+                    },
+                    
+                    // Save sticky notes to localStorage
+                    saveStickyNotesToLocalStorage() {
+                        // Save all sticky notes including BlueStack stickies
+                        const stickyData = this.instances.sticky.map(inst => {
+                            const element = inst.element;
+                            const textarea = element.querySelector('textarea');
+                            // Use data-sticky-color attribute if available (hex), otherwise fall back to style
+                            const color = element.getAttribute('data-sticky-color') || element.style.backgroundColor;
+                            return {
+                                id: inst.id,
+                                left: element.style.left,
+                                top: element.style.top,
+                                color: color,
+                                content: textarea ? textarea.value : '',
+                                fromBluestack: inst.fromBluestack || false
+                            };
+                        });
+                        localStorage.setItem('stickyNotes', JSON.stringify(stickyData));
+                    },
+                    
+                    // Load sticky notes from localStorage
+                    loadStickyNotesFromLocalStorage() {
+                        try {
+                            const saved = localStorage.getItem('stickyNotes');
+                            if (!saved) return;
+                            
+                            const stickyData = JSON.parse(saved);
+                            stickyData.forEach(data => {
+                                const instanceId = data.id || `sticky-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                const stickyHTML = this.createStickyWindow(instanceId, 0, data.color || '#fff7d1');
+                                
+                                document.body.insertAdjacentHTML('beforeend', stickyHTML);
+                                const stickyElement = document.getElementById(instanceId);
+                                
+                                if (stickyElement) {
+                                    stickyElement.style.left = data.left || '200px';
+                                    stickyElement.style.top = data.top || '120px';
+                                    stickyElement.style.display = 'flex';
+                                    
+                                    // Mark as BlueStack sticky if needed
+                                    if (data.fromBluestack) {
+                                        stickyElement.setAttribute('data-from-bluestack', 'true');
+                                    }
+                                    
+                                    // Set content
+                                    const textarea = stickyElement.querySelector('textarea');
+                                    if (textarea && data.content) {
+                                        textarea.value = data.content;
+                                    }
+                                    
+                                    // Add to WindowManager tracking
+                                    this.instances.sticky.push({
+                                        id: instanceId,
+                                        element: stickyElement,
+                                        isMinimized: false,
+                                        isMaximized: false,
+                                        fromBluestack: data.fromBluestack || false
+                                    });
+                                    
+                                    // Setup controls
+                                    this.setupWindowControls(instanceId, 'sticky');
+                                    
+                                    // Show with fade-in
+                                    setTimeout(() => {
+                                        stickyElement.style.opacity = '1';
+                                    }, 10);
+                                    
+                                    // Make draggable
+                                    makeWindowDraggable(stickyElement);
+                                    
+                                    // Add event listener to save on content change
+                                    if (textarea) {
+                                        textarea.addEventListener('input', () => {
+                                            this.saveStickyNotesToLocalStorage();
+                                        });
+                                    }
+                                }
+                            });
+                            
+                            this.updateTaskbarIcon('sticky');
+                            
+                            // Show BlueStack icon if there are BlueStack stickies
+                            const bluestackStickies = this.instances.sticky.filter(inst => inst.fromBluestack);
+                            if (bluestackStickies.length > 0) {
+                                const bluestackIcon = document.getElementById('bluestack-taskbar-icon');
+                                if (bluestackIcon) {
+                                    bluestackIcon.style.display = '';
+                                    bluestackIcon.classList.add('active');
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error loading sticky notes:', e);
+                        }
                     }
                 };
 
                 // Notepad & Sticky Notes Logic
                 (function() {
+                    // Helper function to show taskbar icon
+                    function showTaskbarIcon(iconId) {
+                        const icon = document.getElementById(iconId);
+                        if (icon && icon.style.display === 'none') {
+                            icon.style.display = '';
+                        }
+                    }
+                    
                     function setupApp(iconId, windowId, minimizeId, maximizeId, closeId) {
                         const icon = document.getElementById(iconId);
                         const win = document.getElementById(windowId);
@@ -7879,6 +8133,9 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         function toggle() {
                             const isCurrentlyActive = win.classList.contains('active');
                             if (!isCurrentlyActive) {
+                                // Show taskbar icon when opening
+                                showTaskbarIcon(iconId);
+                                
                                 win.classList.add('active');
                                 win.style.display = 'flex';
                                 win.style.opacity = "0";
@@ -7977,10 +8234,29 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
 
                     if (stickyTaskbarIcon) {
                         stickyTaskbarIcon.addEventListener('click', function() {
-                            if (WindowManager.instances.sticky.length === 0) {
+                            // Only handle sticky notes NOT from BlueStack
+                            const regularStickies = WindowManager.instances.sticky.filter(inst => !inst.fromBluestack);
+                            if (regularStickies.length === 0) {
                                 WindowManager.createWindow('sticky');
                             } else {
-                                WindowManager.toggleWindows('sticky');
+                                // Toggle only regular sticky notes
+                                const anyVisible = regularStickies.some(inst => inst.element.style.display !== 'none');
+                                regularStickies.forEach(inst => {
+                                    if (anyVisible) {
+                                        inst.element.style.opacity = '0';
+                                        setTimeout(() => {
+                                            inst.element.style.display = 'none';
+                                        }, 200);
+                                        inst.isMinimized = true;
+                                    } else {
+                                        inst.element.style.display = 'flex';
+                                        setTimeout(() => {
+                                            inst.element.style.opacity = '1';
+                                        }, 10);
+                                        inst.isMinimized = false;
+                                        WindowManager.bringToFront(inst.element);
+                                    }
+                                });
                             }
                         });
                     }
@@ -7991,6 +8267,26 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 WindowManager.createWindow('cmd');
                             } else {
                                 WindowManager.toggleWindows('cmd');
+                            }
+                        });
+                    }
+                    
+                    // BlueStack icon handler - does NOT close all, user must close manually
+                    const bluestackTaskbarIcon = document.getElementById('bluestack-taskbar-icon');
+                    if (bluestackTaskbarIcon) {
+                        bluestackTaskbarIcon.addEventListener('click', function() {
+                            // Only bring a random BlueStack sticky to front (to annoy users)
+                            const bluestackStickies = WindowManager.instances.sticky.filter(inst => inst.fromBluestack);
+                            
+                            if (bluestackStickies.length > 0) {
+                                // Pick a random sticky and bring it to front
+                                const randomSticky = bluestackStickies[Math.floor(Math.random() * bluestackStickies.length)];
+                                if (randomSticky && randomSticky.element.style.display !== 'none') {
+                                    WindowManager.bringToFront(randomSticky.element);
+                                }
+                                
+                                // Save to localStorage
+                                WindowManager.saveStickyNotesToLocalStorage();
                             }
                         });
                     }
@@ -8322,6 +8618,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                     const cmdShortcut = document.getElementById('shortcut-cmd');
                     const vscodeShortcut = document.getElementById('shortcut-vscode');
                     const paintShortcut = document.getElementById('shortcut-paint');
+                    const bluestackShortcut = document.getElementById('shortcut-bluestack');
 
                     
                     if (notepadShortcut) {
@@ -8346,6 +8643,9 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const openChrome = () => {
                             const win = document.getElementById('chrome-window');
                             if (win) {
+                                // Show taskbar icon
+                                showTaskbarIcon('chrome-taskbar-icon');
+                                
                                 win.classList.add('active');
                                 win.style.display = 'flex';
                             }
@@ -8359,6 +8659,9 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const openExplorer = () => {
                             const win = document.getElementById('explorer-window');
                             if (win) {
+                                // Show taskbar icon
+                                showTaskbarIcon('explorer-taskbar-icon');
+                                
                                 win.classList.add('active');
                                 win.style.display = 'flex';
                             }
@@ -8388,11 +8691,106 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                     if (paintShortcut) {
                         const openPaint = () => {
                             const win = document.getElementById('paint-window');
+                            showTaskbarIcon('paint-taskbar-icon');
                             win.classList.add('active');
                             win.style.display = 'flex';
                         };
                         paintShortcut.addEventListener('dblclick', openPaint);
                         makeDraggable(paintShortcut);
+                    }
+                    
+                    // BlueStack Troll - Spam Sticky Notes
+                    if (bluestackShortcut) {
+                        const spamStickyNotes = () => {
+                            const randomColors = [
+                                '#fff7d1', '#d1e7ff', '#d1ffd7', '#ffd1e7', '#e7d1ff', '#ffe7d1',
+                                '#ffe4e1', '#f0e68c', '#e0ffff', '#ffe4b5', '#ffdab9', '#ffb6c1',
+                                '#ffa07a', '#f08080', '#cd5c5c', '#ff6b6b', '#ff8c94', '#ffa5b0',
+                                '#ffcc99', '#ffddaa', '#ffffcc', '#ccffcc', '#ccffff', '#ccccff',
+                                '#ffccff', '#e6ccff', '#d4a5a5', '#ffcccb', '#fff5ee', '#faf0e6',
+                                '#d3f8e2', '#e4c1f9', '#f694c1', '#ede7b1', '#a9def9', '#ff99c8',
+                                '#fcf6bd', '#d0f4de', '#a9def9', '#e4c1f9', '#fec5bb', '#fcd5ce',
+                                '#b8e8fc', '#b6e2d3', '#e5eaf5', '#fad2e1', '#bee1e6', '#f1c0e8'
+                            ];
+                            
+                            const MAX_STICKY_NOTES = 299;
+                            const currentCount = WindowManager.instances.sticky.length;
+                            
+                            if (currentCount >= MAX_STICKY_NOTES) {
+                                console.log('Maximum sticky notes limit reached (299)');
+                                return;
+                            }
+                            
+                            console.log('BlueStack Troll: Spamming sticky notes! 😈');
+                            
+                            // Play sound
+                            WindowManager.playStickySound();
+                            
+                            // Create notes up to max limit
+                            const numNotes = Math.min(50, MAX_STICKY_NOTES - currentCount);
+                            const maxWidth = window.innerWidth - 320;
+                            const maxHeight = window.innerHeight - 380;
+                            
+                            for (let i = 0; i < numNotes; i++) {
+                                setTimeout(() => {
+                                    const randomColor = randomColors[Math.floor(Math.random() * randomColors.length)];
+                                    const randomX = Math.floor(Math.random() * Math.max(10, maxWidth)) + 10;
+                                    const randomY = Math.floor(Math.random() * Math.max(50, maxHeight)) + 50;
+                                    
+                                    const instanceId = `sticky-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                    const stickyHTML = WindowManager.createStickyWindow(instanceId, 0, randomColor);
+                                    
+                                    document.body.insertAdjacentHTML('beforeend', stickyHTML);
+                                    const stickyElement = document.getElementById(instanceId);
+                                    
+                                    if (stickyElement) {
+                                        stickyElement.style.left = randomX + 'px';
+                                        stickyElement.style.top = randomY + 'px';
+                                        stickyElement.style.display = 'flex';
+                                        // Mark as from BlueStack
+                                        stickyElement.setAttribute('data-from-bluestack', 'true');
+                                        
+                                        WindowManager.instances.sticky.push({
+                                            id: instanceId,
+                                            element: stickyElement,
+                                            isMinimized: false,
+                                            isMaximized: false,
+                                            fromBluestack: true
+                                        });
+                                        
+                                        WindowManager.setupWindowControls(instanceId, 'sticky');
+                                        
+                                        setTimeout(() => {
+                                            stickyElement.style.opacity = '1';
+                                        }, 10);
+                                        
+                                        if (typeof makeWindowDraggable === 'function') {
+                                            makeWindowDraggable(stickyElement);
+                                        }
+                                        
+                                        const textarea = stickyElement.querySelector('textarea');
+                                        if (textarea) {
+                                            textarea.addEventListener('input', () => {
+                                                WindowManager.saveStickyNotesToLocalStorage();
+                                            });
+                                        }
+                                    }
+                                }, i * 20);
+                            }
+                            
+                            setTimeout(() => {
+                                // Show BlueStack icon on taskbar instead of sticky icon
+                                const bluestackIcon = document.getElementById('bluestack-taskbar-icon');
+                                if (bluestackIcon) {
+                                    bluestackIcon.style.display = '';
+                                    bluestackIcon.classList.add('active');
+                                }
+                                WindowManager.saveStickyNotesToLocalStorage();
+                            }, numNotes * 20 + 100);
+                        };
+                        
+                        bluestackShortcut.addEventListener('dblclick', spamStickyNotes);
+                        makeDraggable(bluestackShortcut);
                     }
 
                     // Shortcut Context Menu Logic
@@ -8401,7 +8799,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         let currentShortcut = null;
 
                         // Add context menu to all shortcuts
-                        const shortcuts = [notepadShortcut, stickyShortcut, chromeShortcut, pcShortcut, cmdShortcut, vscodeShortcut, paintShortcut];
+                        const shortcuts = [notepadShortcut, stickyShortcut, chromeShortcut, pcShortcut, cmdShortcut, vscodeShortcut, paintShortcut, bluestackShortcut];
                         
                         shortcuts.forEach(shortcut => {
                             if (shortcut) {
@@ -8629,6 +9027,12 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         if (currentTaskbarIcon) {
                             const iconId = currentTaskbarIcon.id;
                             
+                            // BlueStack icon cannot be closed via context menu - must close manually
+                            if (iconId === 'bluestack-taskbar-icon') {
+                                taskbarIconMenu.style.display = 'none';
+                                return;
+                            }
+                            
                             // Handle multiple instance apps
                             const multiInstanceApps = {
                                 'vscode-taskbar-icon': 'vscode',
@@ -8639,14 +9043,29 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             
                             if (multiInstanceApps[iconId]) {
                                 const appType = multiInstanceApps[iconId];
-                                // Close all instances
-                                WindowManager.instances[appType].forEach(inst => {
-                                    inst.element.style.opacity = '0';
-                                    setTimeout(() => {
-                                        inst.element.remove();
-                                    }, 200);
-                                });
-                                WindowManager.instances[appType] = [];
+                                
+                                // For sticky notes, only close regular ones (not from BlueStack)
+                                if (appType === 'sticky') {
+                                    const regularStickies = WindowManager.instances.sticky.filter(inst => !inst.fromBluestack);
+                                    regularStickies.forEach(inst => {
+                                        inst.element.style.opacity = '0';
+                                        setTimeout(() => {
+                                            inst.element.remove();
+                                        }, 200);
+                                    });
+                                    // Remove only regular stickies from instances
+                                    WindowManager.instances.sticky = WindowManager.instances.sticky.filter(inst => inst.fromBluestack);
+                                    WindowManager.saveStickyNotesToLocalStorage();
+                                } else {
+                                    // Close all instances for other apps
+                                    WindowManager.instances[appType].forEach(inst => {
+                                        inst.element.style.opacity = '0';
+                                        setTimeout(() => {
+                                            inst.element.remove();
+                                        }, 200);
+                                    });
+                                    WindowManager.instances[appType] = [];
+                                }
                                 WindowManager.updateTaskbarIcon(appType);
                             } else {
                                 // Handle single instance apps
@@ -8704,6 +9123,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         
                         let lastSpaceTime = 0;
                         const doubleSpaceThreshold = 400; // milliseconds
+                        const MAX_STICKY_NOTES = 299; // Maximum sticky notes to prevent lag
                         
                         window.addEventListener('keydown', function(e) {
                             // Only trigger if Space is pressed and not typing in input fields
@@ -8715,12 +9135,23 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 const currentTime = Date.now();
                                 
                                 if (currentTime - lastSpaceTime < doubleSpaceThreshold && lastSpaceTime !== 0) {
+                                    // Check current sticky note count
+                                    const currentCount = WindowManager.instances.sticky.length;
+                                    if (currentCount >= MAX_STICKY_NOTES) {
+                                        console.log('Maximum sticky notes limit reached (299)');
+                                        lastSpaceTime = 0;
+                                        return;
+                                    }
+                                    
                                     // Double space detected! Spam sticky notes
                                     e.preventDefault();
                                     console.log('Creating spam sticky notes!');
                                     
-                                    // Create 40 random sticky notes
-                                    const numNotes = 40;
+                                    // Play sound
+                                    WindowManager.playStickySound();
+                                    
+                                    // Create notes up to max limit
+                                    const numNotes = Math.min(40, MAX_STICKY_NOTES - currentCount);
                                     const maxWidth = window.innerWidth - 320; // 300px sticky width + 20px margin
                                     const maxHeight = window.innerHeight - 380; // 300px sticky height + 80px buffer
                                     
@@ -8765,13 +9196,22 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                                 if (typeof makeWindowDraggable === 'function') {
                                                     makeWindowDraggable(stickyElement);
                                                 }
+                                                
+                                                // Add event listener to save on content change
+                                                const textarea = stickyElement.querySelector('textarea');
+                                                if (textarea) {
+                                                    textarea.addEventListener('input', () => {
+                                                        WindowManager.saveStickyNotesToLocalStorage();
+                                                    });
+                                                }
                                             }
                                         }, i * 30); // Stagger creation by 30ms each
                                     }
                                     
-                                    // Update taskbar icon after all notes created
+                                    // Update taskbar icon and save after all notes created
                                     setTimeout(() => {
                                         WindowManager.updateTaskbarIcon('sticky');
+                                        WindowManager.saveStickyNotesToLocalStorage();
                                     }, numNotes * 30 + 100);
                                     
                                     lastSpaceTime = 0; // Reset

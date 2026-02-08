@@ -220,6 +220,91 @@
             pointer-events: none;
         }
 
+        /* Screen Mode Dropdown */
+        .screen-mode-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dropdown-container {
+            position: relative;
+            width: 180px;
+        }
+
+        .dropdown-selected {
+            background-color: rgba(30, 30, 30, 0.9);
+            color: #fff;
+            padding: 10px 15px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .dropdown-selected:hover {
+            background-color: rgba(45, 45, 45, 0.9);
+            border-color: #0078d7;
+        }
+
+        .dropdown-selected i {
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .dropdown-container.active .dropdown-selected i {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: rgba(30, 30, 30, 0.95);
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-container.active .dropdown-options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-option {
+            padding: 10px 15px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-option:hover {
+            background-color: rgba(0, 120, 215, 0.8);
+        }
+
+        .dropdown-option i {
+            font-size: 14px;
+            width: 16px;
+        }
+
         .avatar-container {
             text-align: center;
             margin-bottom: 30px;
@@ -3873,6 +3958,25 @@
 
     <!-- Loading Screen -->
     <div class="loader-container" id="loaderContainer">
+        <!-- Screen Mode Selector -->
+        <div class="screen-mode-selector">
+            <div class="dropdown-container" id="screenModeDropdown">
+                <div class="dropdown-selected">
+                    <span id="selectedMode">Normal Mode</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options">
+                    <div class="dropdown-option" data-mode="normal">
+                        <i class="fas fa-window-restore"></i>
+                        <span>Normal Mode</span>
+                    </div>
+                    <div class="dropdown-option" data-mode="fullscreen">
+                        <i class="fas fa-expand"></i>
+                        <span>Full Screen</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="music-waves">
             <svg class="wave-svg" viewBox="0 0 2000 200" preserveAspectRatio="none">
                 <path class="wave-path wave-path-1" d="M 0 100 Q 250 80, 500 100 T 1000 100 T 1500 100 T 2000 100" />
@@ -5156,6 +5260,81 @@ C:\Users\boss><span class="cmd-cursor" style="background-color: #fff; color: #0c
 
             <script src="https://kit.fontawesome.com/ba2000386c.js"></script>
             <script>
+// Screen Mode Dropdown Handler
+const screenModeDropdown = document.getElementById('screenModeDropdown');
+const selectedModeSpan = document.getElementById('selectedMode');
+const dropdownOptions = document.querySelectorAll('.dropdown-option');
+
+// Load saved screen mode from localStorage
+const savedMode = localStorage.getItem('screenMode') || 'normal';
+let currentMode = savedMode;
+
+// Update selected mode display
+function updateModeDisplay(mode) {
+    if (mode === 'fullscreen') {
+        selectedModeSpan.textContent = 'Full Screen';
+    } else {
+        selectedModeSpan.textContent = 'Normal Mode';
+    }
+}
+
+// Toggle dropdown
+screenModeDropdown.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown-option')) {
+        screenModeDropdown.classList.toggle('active');
+    }
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!screenModeDropdown.contains(e.target)) {
+        screenModeDropdown.classList.remove('active');
+    }
+});
+
+// Handle option selection
+dropdownOptions.forEach(option => {
+    option.addEventListener('click', function() {
+        const mode = this.getAttribute('data-mode');
+        currentMode = mode;
+        localStorage.setItem('screenMode', mode);
+        updateModeDisplay(mode);
+        screenModeDropdown.classList.remove('active');
+        
+        // Apply fullscreen mode immediately
+        if (mode === 'fullscreen') {
+            enterFullscreen();
+        } else {
+            exitFullscreen();
+        }
+    });
+});
+
+// Fullscreen functions
+function enterFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+    }
+}
+
+function exitFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
+}
+
+// Initialize mode display
+updateModeDisplay(currentMode);
+
 // Slide-in effect for greeting text
 function slideInText(element, text) {
     element.innerHTML = '';
@@ -5170,6 +5349,10 @@ function slideInText(element, text) {
 }
 
 window.addEventListener('load', function () {
+    // Apply saved screen mode
+    if (currentMode === 'fullscreen') {
+        setTimeout(() => enterFullscreen(), 500);
+    }
     // Start slide-in effect for greeting text
     const greetingText = document.querySelector('.greeting-text');
     if (greetingText) {

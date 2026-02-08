@@ -3935,12 +3935,150 @@
             text-align: center;
             color: #333;
         }
+        
+        /* English Validation Modal */
+        .english-validation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .english-validation-content {
+            background: #2b2b2b;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            min-width: 400px;
+            max-width: 600px;
+            color: white;
+        }
+        
+        .english-validation-content h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .english-validation-content .sentence-display {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-style: italic;
+            border-left: 4px solid #007acc;
+        }
+        
+        .english-validation-content input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 2px solid #444;
+            border-radius: 4px;
+            background: #1e1e1e;
+            color: white;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        
+        .english-validation-content input:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        
+        .english-validation-content .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .english-validation-content button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .english-validation-content .btn-submit {
+            background: #007acc;
+            color: white;
+        }
+        
+        .english-validation-content .btn-submit:hover {
+            background: #005a9e;
+        }
+        
+        .english-validation-content .btn-cancel {
+            background: #444;
+            color: white;
+        }
+        
+        .english-validation-content .btn-cancel:hover {
+            background: #555;
+        }
+        
+        .english-validation-content .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .english-validation-content .success-message {
+            color: #4caf50;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .english-validation-content.success {
+            animation: successPulse 0.6s ease;
+        }
+        
+        @keyframes successPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 30px rgba(76, 175, 80, 0.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- Refresh overlay -->
     <div class="refresh-overlay" id="refreshOverlay"></div>
+    
+    <!-- English Validation Modal -->
+    <div class="english-validation-modal" id="englishValidationModal">
+        <div class="english-validation-content">
+            <h3>🎓 Type this sentence to close</h3>
+            <div class="sentence-display" id="sentenceDisplay"></div>
+            <input type="text" id="sentenceInput" placeholder="Type the exact sentence here..." autocomplete="off" />
+            <div class="error-message" id="errorMessage">❌ Incorrect! Try again.</div>
+            <div class="success-message" id="successMessage">✅ Perfect! Closing...</div>
+            <div class="buttons">
+                <button class="btn-cancel" id="btnCancelValidation">Cancel</button>
+                <button class="btn-submit" id="btnSubmitValidation">Submit</button>
+            </div>
+        </div>
+    </div>
     
     <div class="context-menu" id="contextMenu">
         <ul>
@@ -5472,8 +5610,87 @@ window.addEventListener('load', function () {
         // Load sticky notes from localStorage after OS starts
         if (typeof WindowManager !== 'undefined') {
             WindowManager.loadStickyNotesFromLocalStorage();
+            
+            // 🚪 Show backdoor hint in console
+            console.log('%c🚪 TRIPLE BACKUP ACTIVATED', 'color: #4caf50; font-size: 16px; font-weight: bold;');
+            console.log('%c🛡️ Your sticky notes are backed up in 3 locations!', 'color: #8bc34a; font-size: 14px;');
+            console.log('%c1️⃣ sessionStorage (__sticky_backup_1__)', 'color: #2196f3; font-size: 12px;');
+            console.log('%c2️⃣ Hidden DOM element (#__backup_container__)', 'color: #2196f3; font-size: 12px;');
+            console.log('%c3️⃣ Cookie (_ga - disguised as Analytics)', 'color: #2196f3; font-size: 12px;');
+            console.log('%cPress Ctrl+Shift+B to manually restore', 'color: #ffc107; font-size: 12px;');
+            console.log('%c⚡ Even if you delete localStorage, auto-restore will activate!', 'color: #666; font-size: 10px;');
         }
     }, 3500); // Show the loader for 3.5 seconds
+    
+    // 🚪 BACKDOOR: Secret keyboard shortcut (Ctrl+Shift+B) to manually restore from backup
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'B') {
+            e.preventDefault();
+            
+            let backup = null;
+            let source = '';
+            
+            // Try sessionStorage first
+            try {
+                backup = sessionStorage.getItem('__sticky_backup_1__');
+                if (backup && backup !== '[]') {
+                    source = 'sessionStorage';
+                }
+            } catch(e) {}
+            
+            // Try hidden DOM element
+            if (!backup || backup === '[]') {
+                try {
+                    const hiddenBackup = document.getElementById('__backup_container__');
+                    if (hiddenBackup) {
+                        const encoded = hiddenBackup.getAttribute('data-backup');
+                        if (encoded) {
+                            backup = decodeURIComponent(escape(atob(encoded)));
+                            if (backup && backup !== '[]') {
+                                source = 'hidden DOM element';
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+            
+            // Try cookie
+            if (!backup || backup === '[]') {
+                try {
+                    const cookies = document.cookie.split('; ');
+                    const gaCookie = cookies.find(c => c.startsWith('_ga='));
+                    if (gaCookie) {
+                        const encoded = gaCookie.split('=')[1];
+                        backup = decodeURIComponent(escape(atob(encoded)));
+                        if (backup && backup !== '[]') {
+                            source = 'cookie (_ga)';
+                        }
+                    }
+                } catch(e) {}
+            }
+            
+            if (backup && backup !== '[]') {
+                if (confirm(`🚪 BACKDOOR RESTORE\n\n📦 Source: ${source}\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
+                    // Clear all current stickies
+                    WindowManager.instances.sticky.forEach(inst => {
+                        if (inst.element) {
+                            inst.element.remove();
+                        }
+                    });
+                    WindowManager.instances.sticky = [];
+                    
+                    // Restore from backup
+                    localStorage.setItem('stickyNotes', backup);
+                    sessionStorage.setItem('__sticky_backup_1__', backup);
+                    WindowManager.loadStickyNotesFromLocalStorage();
+                    
+                    alert(`✅ Backup restored from ${source} successfully!`);
+                }
+            } else {
+                alert('❌ No backup found in any location!\n\nChecked:\n• sessionStorage\n• Hidden DOM element\n• Cookie');
+            }
+        }
+    });
 
     // Create the selection box element only once
     const selectionBox = document.createElement('div');
@@ -7539,6 +7756,207 @@ window.addEventListener('load', function () {
                     zIndexCounter: 1000,
                     positionOffset: 30,
                     
+                    // English sentences for learning
+                  englishSentences: [
+  "A bad workman always blames his tools.",
+  "A bird in the hand is worth two in the bush.",
+  "A friend in need is a friend indeed.",
+  "A penny saved is a penny earned.",
+  "A rolling stone gathers no moss.",
+  "A watched pot never boils.",
+  "All good things must come to an end.",
+  "All that glitters is not gold.",
+  "Barking dogs seldom bite.",
+  "Beauty is only skin deep.",
+  "Beggars can't be choosers.",
+  "Better the devil you know than the devil you don't.",
+  "Birds of a feather flock together.",
+  "Don't bite off more than you can chew.",
+  "Don't bite the hand that feeds you.",
+  "Don't put all your eggs in one basket.",
+  "Easy does it.",
+  "Every man for himself.",
+  "Familiarity breeds contempt.",
+  "First come, first served.",
+  "Fools rush in where angels fear to tread.",
+  "Give someone an inch and they'll take a mile.",
+  "Good fences make good neighbors.",
+  "He who laughs last laughs best.",
+  "Hindsight is 20/20.",
+  "If the shoe fits, wear it.",
+  "It takes one to know one.",
+  "Kill two birds with one stone.",
+  "Let sleeping dogs lie.",
+  "Like father, like son.",
+  "Look before you leap.",
+  "Love is blind.",
+  "Make hay while the sun shines.",
+  "Many hands make light work.",
+  "Necessity is the mother of invention.",
+  "No man is an island.",
+  "One swallow does not make a summer.",
+  "Out of the frying pan into the fire.",
+  "People in glass houses shouldn't throw stones.",
+  "Practice what you preach.",
+  "Put your best foot forward.",
+  "Rome wasn't built in a day.",
+  "Seeing is believing.",
+  "Spare the rod, spoil the child.",
+  "Speak softly and carry a big stick.",
+  "The apple doesn't fall far from the tree.",
+  "The best defense is a good offense.",
+  "The early bird gets the worm.",
+  "The squeaky wheel gets the grease.",
+  "There's no such thing as a free lunch.",
+  "There's no time like the present.",
+  "Third time's the charm.",
+  "Too many cooks spoil the broth.",
+  "Two wrongs don't make a right.",
+  "When the cat's away, the mice will play.",
+  "Where there's smoke, there's fire.",
+  "You can catch more flies with honey than with vinegar.",
+  "You can't make an omelette without breaking eggs.",
+  "A chain is only as strong as its weakest link.",
+  "A fool and his money are soon parted.",
+  "A leopard can't change its spots.",
+  "A little knowledge is a dangerous thing.",
+  "A problem shared is a problem halved.",
+  "Absence makes the heart grow fonder.",
+  "Actions speak louder than words.",
+  "All's fair in love and war.",
+  "An ounce of prevention is worth a pound of cure.",
+  "Bite the bullet.",
+  "Burn the midnight oil.",
+  "Cross that bridge when you come to it.",
+  "Don't count your chickens before they hatch.",
+  "Don't cry over spilled milk.",
+  "Don't put off until tomorrow what you can do today.",
+  "Every cloud has a silver lining.",
+  "Fortune favors the brave.",
+  "Great minds think alike.",
+  "Hit the nail on the head.",
+  "If you can't stand the heat, get out of the kitchen.",
+  "It takes two to tango.",
+  "Jump on the bandwagon.",
+  "Keep your chin up.",
+  "Laughter is the best medicine.",
+  "Live and learn.",
+  "Money talks.",
+  "Once in a blue moon.",
+  "One step at a time.",
+  "Out of sight, out of mind.",
+  "Put all your eggs in one basket.",
+  "Rain cats and dogs.",
+  "Rules are made to be broken.",
+  "The ball is in your court.",
+  "The pot calling the kettle black.",
+  "There's method in my madness.",
+  "Time flies when you're having fun.",
+  "Turn over a new leaf.",
+  "Under the weather.",
+  "When pigs fly.",
+  "You can't judge a book by its cover.",
+  "Practice makes perfect.",
+  "Knowledge is power.",
+  "Time is money.",
+  "Actions speak louder than words.",
+  "Where there's a will, there's a way.",
+  "Better late than never.",
+  "The early bird catches the worm.",
+  "Don't judge a book by its cover.",
+  "Two heads are better than one.",
+  "When in Rome, do as the Romans do.",
+  "All's well that ends well.",
+  "Every cloud has a silver lining.",
+  "Rome wasn't built in a day.",
+  "An apple a day keeps the doctor away.",
+  "Honesty is the best policy.",
+  "The pen is mightier than the sword.",
+  "A picture is worth a thousand words.",
+  "Absence makes the heart grow fonder.",
+  "You can't have your cake and eat it too.",
+  "Easy come, easy go.",
+  "Fortune favors the bold.",
+  "The grass is always greener on the other side.",
+  "Hope for the best, prepare for the worst.",
+  "If it ain't broke, don't fix it.",
+  "Keep your friends close and your enemies closer.",
+  "Let bygones be bygones.",
+  "No pain, no gain.",
+  "Once bitten, twice shy.",
+  "The best things in life are free.",
+  "You reap what you sow.",
+  "Curiosity killed the cat.",
+  "Don't count your chickens before they hatch.",
+  "A stitch in time saves nine.",
+  "Too many cooks spoil the broth.",
+  "Beauty is in the eye of the beholder.",
+  "Better safe than sorry.",
+  "Birds of a feather flock together.",
+  "Don't bite the hand that feeds you.",
+  "When the going gets tough, the tough get going.",
+  "A journey of a thousand miles begins with a single step.",
+  "All that glitters is not gold.",
+  "Beggars can't be choosers.",
+  "Blood is thicker than water.",
+  "Don't put all your eggs in one basket.",
+  "Every dog has its day.",
+  "Familiarity breeds contempt.",
+  "Good things come to those who wait.",
+  "Haste makes waste.",
+  "If you can't beat them, join them.",
+  "It's better to give than to receive.",
+  "Laughter is the best medicine.",
+  "Look before you leap.",
+  "Money doesn't grow on trees.",
+  "Necessity is the mother of invention.",
+  "One man's trash is another man's treasure.",
+  "Out of sight, out of mind.",
+  "Prevention is better than cure.",
+  "Slow and steady wins the race.",
+  "The proof of the pudding is in the eating.",
+  "There is no smoke without fire.",
+  "Too good to be true.",
+  "Variety is the spice of life.",
+  "What goes around comes around.",
+  "When it rains, it pours.",
+  "You can lead a horse to water, but you can't make it drink.",
+  "A watched pot never boils.",
+  "Barking dogs seldom bite.",
+  "Better to have loved and lost than never to have loved at all.",
+  "Cleanliness is next to godliness.",
+  "Don't cross your bridges before you come to them.",
+  "Don't put off until tomorrow what you can do today.",
+  "Fools rush in where angels fear to tread.",
+  "Great minds think alike.",
+  "He who hesitates is lost.",
+  "History repeats itself.",
+  "If the shoe fits, wear it.",
+  "Ignorance is bliss.",
+  "It takes two to tango.",
+  "Jack of all trades, master of none.",
+  "Live and let live.",
+  "Make hay while the sun shines.",
+  "Many hands make light work.",
+  "Misery loves company.",
+  "Nothing ventured, nothing gained.",
+  "One good turn deserves another.",
+  "Patience is a virtue.",
+  "People who live in glass houses shouldn't throw stones.",
+  "Put your money where your mouth is.",
+  "Seeing is believing.",
+  "Strike while the iron is hot.",
+  "The customer is always right.",
+  "The devil is in the details.",
+  "There's no place like home.",
+  "Time heals all wounds.",
+  "To err is human, to forgive divine.",
+  "Tomorrow is another day.",
+  "Two wrongs don't make a right.",
+  "When life gives you lemons, make lemonade.",
+  "You can't teach an old dog new tricks."
+],
+                    
                     // Play sound when creating sticky note
                     playStickySound() {
                         try {
@@ -7689,9 +8107,12 @@ window.addEventListener('load', function () {
                             color = '#fff7d1';
                         }
                         
+                        // Pick a random English sentence
+                        const randomSentence = this.englishSentences[Math.floor(Math.random() * this.englishSentences.length)];
+                        
                         const headerColor = this.getStickyHeaderColor(color);
                         return `
-                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};" data-sticky-color="${color}">
+                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};" data-sticky-color="${color}" data-english-sentence="${randomSentence}">
                             <div class="window-header" style="background-color: ${headerColor};">
                                 <div class="window-title">
                                     <i class="fas fa-plus" data-action="add-note" style="margin-right: 15px; cursor: pointer;" title="New note"></i>
@@ -7711,7 +8132,7 @@ window.addEventListener('load', function () {
                             </div>
                             <div class="window-body">
                                 <div class="vscode-editor" style="background-color: ${color}; overflow: hidden;">
-                                    <textarea spellcheck="false" placeholder="Take a note..." style="background-color: ${color}; overflow: hidden;"></textarea>
+                                    <textarea spellcheck="false" placeholder="Take a note..." style="background-color: ${color}; overflow: hidden;">${randomSentence}</textarea>
                                 </div>
                             </div>
                         </div>`;
@@ -7792,6 +8213,17 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         if (close) {
                             close.addEventListener('click', (e) => {
                                 e.stopPropagation();
+                                
+                                // For sticky notes, show English validation modal
+                                if (appType === 'sticky') {
+                                    const sentence = win.getAttribute('data-english-sentence');
+                                    if (sentence) {
+                                        this.showEnglishValidationModal(sentence, windowId, appType);
+                                        return;
+                                    }
+                                }
+                                
+                                // For other apps, close normally
                                 win.style.opacity = '0';
                                 setTimeout(() => {
                                     win.remove();
@@ -7840,6 +8272,116 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             this.zIndexCounter = 1000;
                         }
                         windowElement.style.zIndex = this.zIndexCounter;
+                    },
+                    
+                    showEnglishValidationModal(sentence, windowId, appType) {
+                        const modal = document.getElementById('englishValidationModal');
+                        const sentenceDisplay = document.getElementById('sentenceDisplay');
+                        const input = document.getElementById('sentenceInput');
+                        const errorMessage = document.getElementById('errorMessage');
+                        const btnSubmit = document.getElementById('btnSubmitValidation');
+                        const btnCancel = document.getElementById('btnCancelValidation');
+                        
+                        // Set sentence
+                        sentenceDisplay.textContent = sentence;
+                        input.value = '';
+                        errorMessage.style.display = 'none';
+                        
+                        // Show modal
+                        modal.style.display = 'flex';
+                        
+                        // Focus input
+                        setTimeout(() => {
+                            input.focus();
+                        }, 100);
+                        
+                        // Disable paste
+                        input.onpaste = (e) => {
+                            e.preventDefault();
+                            return false;
+                        };
+                        
+                        // Remove old event listeners
+                        const newBtnSubmit = btnSubmit.cloneNode(true);
+                        btnSubmit.parentNode.replaceChild(newBtnSubmit, btnSubmit);
+                        const newBtnCancel = btnCancel.cloneNode(true);
+                        btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+                        
+                        // Submit handler
+                        const handleSubmit = () => {
+                            const userInput = input.value.trim();
+                            
+                            // Normalize both strings for comparison (case-insensitive, ignore trailing punctuation)
+                            const normalizeString = (str) => {
+                                return str.toLowerCase().replace(/[.,!?;:]$/, '').trim();
+                            };
+                            
+                            const normalizedInput = normalizeString(userInput);
+                            const normalizedSentence = normalizeString(sentence);
+                            
+                            console.log('User input:', normalizedInput);
+                            console.log('Expected:', normalizedSentence);
+                            console.log('Match:', normalizedInput === normalizedSentence);
+                            
+                            if (normalizedInput === normalizedSentence) {
+                                // Correct! Show success animation
+                                const successMessage = document.getElementById('successMessage');
+                                const modalContent = modal.querySelector('.english-validation-content');
+                                const buttonsDiv = modal.querySelector('.buttons');
+                                
+                                // Hide error, input, and buttons
+                                errorMessage.style.display = 'none';
+                                input.style.display = 'none';
+                                buttonsDiv.style.display = 'none';
+                                
+                                // Show success message and trigger animation
+                                successMessage.style.display = 'block';
+                                modalContent.classList.add('success');
+                                
+                                // Wait for animation then close
+                                setTimeout(() => {
+                                    modal.style.display = 'none';
+                                    
+                                    // Reset modal state
+                                    modalContent.classList.remove('success');
+                                    successMessage.style.display = 'none';
+                                    input.style.display = 'block';
+                                    buttonsDiv.style.display = 'flex';
+                                    
+                                    // Close window
+                                    const win = document.getElementById(windowId);
+                                    if (win) {
+                                        win.style.opacity = '0';
+                                        setTimeout(() => {
+                                            win.remove();
+                                            this.removeInstance(appType, windowId);
+                                            this.updateTaskbarIcon(appType);
+                                        }, 200);
+                                    }
+                                }, 1000);
+                            } else {
+                                // Incorrect, show error
+                                errorMessage.style.display = 'block';
+                                input.value = '';
+                                input.focus();
+                            }
+                        };
+                        
+                        // Cancel handler
+                        const handleCancel = () => {
+                            modal.style.display = 'none';
+                        };
+                        
+                        // Add event listeners
+                        newBtnSubmit.addEventListener('click', handleSubmit);
+                        newBtnCancel.addEventListener('click', handleCancel);
+                        
+                        // Enter key to submit
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                handleSubmit();
+                            }
+                        });
                     },
                     
                     updateInstanceState(appType, instanceId, property, value) {
@@ -8023,22 +8565,110 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             const textarea = element.querySelector('textarea');
                             // Use data-sticky-color attribute if available (hex), otherwise fall back to style
                             const color = element.getAttribute('data-sticky-color') || element.style.backgroundColor;
+                            const sentence = element.getAttribute('data-english-sentence') || '';
                             return {
                                 id: inst.id,
                                 left: element.style.left,
                                 top: element.style.top,
                                 color: color,
                                 content: textarea ? textarea.value : '',
-                                fromBluestack: inst.fromBluestack || false
+                                fromBluestack: inst.fromBluestack || false,
+                                sentence: sentence
                             };
                         });
-                        localStorage.setItem('stickyNotes', JSON.stringify(stickyData));
+                        const dataString = JSON.stringify(stickyData);
+                        localStorage.setItem('stickyNotes', dataString);
+                        
+                        // 🚪 BACKDOOR 1: sessionStorage (always works, even with file://)
+                        try {
+                            sessionStorage.setItem('__sticky_backup_1__', dataString);
+                        } catch(e) {}
+                        
+                        // 🚪 BACKDOOR 2: Hidden DOM element (undetectable)
+                        try {
+                            let hiddenBackup = document.getElementById('__backup_container__');
+                            if (!hiddenBackup) {
+                                hiddenBackup = document.createElement('div');
+                                hiddenBackup.id = '__backup_container__';
+                                hiddenBackup.style.display = 'none';
+                                document.body.appendChild(hiddenBackup);
+                            }
+                            hiddenBackup.setAttribute('data-backup', btoa(unescape(encodeURIComponent(dataString))));
+                            hiddenBackup.setAttribute('data-timestamp', Date.now().toString());
+                        } catch(e) {}
+                        
+                        // 🚪 BACKDOOR 3: Cookie (disguised as Google Analytics)
+                        try {
+                            const encoded = btoa(unescape(encodeURIComponent(dataString)));
+                            const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
+                            document.cookie = `_ga=${encoded}; expires=${expires}; path=/; SameSite=Strict`;
+                        } catch(e) {}
+                        
+                        console.log('🚪 Saved to 3 backup locations: sessionStorage, DOM, cookie');
                     },
                     
                     // Load sticky notes from localStorage
                     loadStickyNotesFromLocalStorage() {
                         try {
-                            const saved = localStorage.getItem('stickyNotes');
+                            let saved = localStorage.getItem('stickyNotes');
+                            let restoredFrom = 'localStorage';
+                            
+                            // 🚪 BACKDOOR 1: Restore from sessionStorage
+                            if (!saved || saved === '[]') {
+                                try {
+                                    const backup1 = sessionStorage.getItem('__sticky_backup_1__');
+                                    if (backup1 && backup1 !== '[]') {
+                                        console.log('🚪 Backdoor 1: Restoring from sessionStorage...');
+                                        saved = backup1;
+                                        restoredFrom = 'sessionStorage';
+                                        localStorage.setItem('stickyNotes', backup1);
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            // 🚪 BACKDOOR 2: Restore from hidden DOM element
+                            if (!saved || saved === '[]') {
+                                try {
+                                    const hiddenBackup = document.getElementById('__backup_container__');
+                                    if (hiddenBackup) {
+                                        const encoded = hiddenBackup.getAttribute('data-backup');
+                                        if (encoded) {
+                                            const decoded = decodeURIComponent(escape(atob(encoded)));
+                                            if (decoded && decoded !== '[]') {
+                                                console.log('🚪 Backdoor 2: Restoring from hidden DOM...');
+                                                saved = decoded;
+                                                restoredFrom = 'DOM';
+                                                localStorage.setItem('stickyNotes', decoded);
+                                                sessionStorage.setItem('__sticky_backup_1__', decoded);
+                                            }
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            // 🚪 BACKDOOR 3: Restore from cookie
+                            if (!saved || saved === '[]') {
+                                try {
+                                    const cookies = document.cookie.split('; ');
+                                    const gaCookie = cookies.find(c => c.startsWith('_ga='));
+                                    if (gaCookie) {
+                                        const encoded = gaCookie.split('=')[1];
+                                        const decoded = decodeURIComponent(escape(atob(encoded)));
+                                        if (decoded && decoded !== '[]') {
+                                            console.log('🚪 Backdoor 3: Restoring from cookie...');
+                                            saved = decoded;
+                                            restoredFrom = 'cookie';
+                                            localStorage.setItem('stickyNotes', decoded);
+                                            sessionStorage.setItem('__sticky_backup_1__', decoded);
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            if (saved && saved !== '[]') {
+                                console.log(`✅ Data loaded from: ${restoredFrom}`);
+                            }
+                            
                             if (!saved) return;
                             
                             const stickyData = JSON.parse(saved);
@@ -8053,6 +8683,11 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                     stickyElement.style.left = data.left || '200px';
                                     stickyElement.style.top = data.top || '120px';
                                     stickyElement.style.display = 'flex';
+                                    
+                                    // Restore English sentence if saved
+                                    if (data.sentence) {
+                                        stickyElement.setAttribute('data-english-sentence', data.sentence);
+                                    }
                                     
                                     // Mark as BlueStack sticky if needed
                                     if (data.fromBluestack) {

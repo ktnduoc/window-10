@@ -5782,23 +5782,7 @@ window.addEventListener('load', function () {
                 }
             }
             
-            // Try all cookies
-            if (!backup || backup === '[]') {
-                const cookies = document.cookie.split('; ');
-                const cookieNames = ['_ga', '_gid', 'YSC', 'VISITOR_INFO1_LIVE', 'PREF'];
-                for (const name of cookieNames) {
-                    const cookie = cookies.find(c => c.startsWith(`${name}=`));
-                    if (cookie) {
-                        const data = cookie.split('=')[1];
-                        const decrypted = tryDecrypt(data);
-                        if (decrypted && decrypted !== '[]') {
-                            backup = decrypted;
-                            source = `cookie (${name})`;
-                            break;
-                        }
-                    }
-                }
-            }
+            // Skip cookies - removed to avoid REQUEST_HEADER_TOO_LARGE error
             
             // Try IndexedDB
             if (!backup || backup === '[]') {
@@ -5818,7 +5802,7 @@ window.addEventListener('load', function () {
                             }
                         }
                     } else {
-                        alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• Cookies (5)\n• IndexedDB');
+                        alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
                     }
                 });
                 return;
@@ -5842,7 +5826,7 @@ window.addEventListener('load', function () {
                     alert(`✅ Backup restored from ${source} successfully!`);
                 }
             } else {
-                alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• Cookies (5)\n• IndexedDB');
+                alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
             }
         }
     });
@@ -9132,31 +9116,13 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             sessionStorage.setItem('browser_sync_prefs', encrypted);
                         } catch(e) {}
                         
-                        // 3. COOKIES - Multiple cookies disguised as legitimate services
+                        // 3. COOKIES - Only save small cookie to avoid REQUEST_HEADER_TOO_LARGE error
                         try {
                             const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
-                            const cookieData = [
-                                { name: '_ga', data: encrypted },
-                                { name: '_gid', data: encrypted },
-                                { name: 'YSC', data: encrypted },
-                                { name: 'VISITOR_INFO1_LIVE', data: encrypted },
-                                { name: 'PREF', data: encrypted }
-                            ];
-                            
-                            cookieData.forEach(cookie => {
-                                // Split large data into chunks if needed (cookies max 4KB)
-                                const maxSize = 3800;
-                                if (cookie.data.length > maxSize) {
-                                    const chunks = Math.ceil(cookie.data.length / maxSize);
-                                    for (let i = 0; i < chunks; i++) {
-                                        const chunk = cookie.data.substr(i * maxSize, maxSize);
-                                        document.cookie = `${cookie.name}_${i}=${chunk}; expires=${expires}; path=/; SameSite=Strict`;
-                                    }
-                                    document.cookie = `${cookie.name}_chunks=${chunks}; expires=${expires}; path=/; SameSite=Strict`;
-                                } else {
-                                    document.cookie = `${cookie.name}=${cookie.data}; expires=${expires}; path=/; SameSite=Strict`;
-                                }
-                            });
+                            // Only save timestamp as indicator that data exists
+                            // Don't save full data to avoid oversized headers on Vercel
+                            const timestamp = Date.now().toString(36); // Base36 for shorter string
+                            document.cookie = `_ga=${timestamp}; expires=${expires}; path=/; SameSite=Strict`;
                         } catch(e) {}
                         
                         // 4. INDEXEDDB - Asynchronous save
@@ -9270,44 +9236,8 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 }
                             }
                             
-                            // 4. Try cookies - check all cookie keys
-                            if (!saved || saved === '[]') {
-                                const cookies = document.cookie.split('; ');
-                                const cookieNames = ['_ga', '_gid', 'YSC', 'VISITOR_INFO1_LIVE', 'PREF'];
-                                
-                                for (const name of cookieNames) {
-                                    // Check for chunked cookie
-                                    const chunkCookie = cookies.find(c => c.startsWith(`${name}_chunks=`));
-                                    if (chunkCookie) {
-                                        const chunks = parseInt(chunkCookie.split('=')[1]);
-                                        let fullData = '';
-                                        for (let i = 0; i < chunks; i++) {
-                                            const chunkCookie = cookies.find(c => c.startsWith(`${name}_${i}=`));
-                                            if (chunkCookie) {
-                                                fullData += chunkCookie.split('=')[1];
-                                            }
-                                        }
-                                        if (fullData) {
-                                            const decrypted = tryDecrypt(fullData);
-                                            if (decrypted && decrypted !== '[]') {
-                                                saved = decrypted;
-                                                break;
-                                            }
-                                        }
-                                    } else {
-                                        // Single cookie
-                                        const cookie = cookies.find(c => c.startsWith(`${name}=`));
-                                        if (cookie) {
-                                            const data = cookie.split('=')[1];
-                                            const decrypted = tryDecrypt(data);
-                                            if (decrypted && decrypted !== '[]') {
-                                                saved = decrypted;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            // 4. Skip cookies - only used as timestamp indicator, real data in other storages
+                            // Cookies removed to avoid REQUEST_HEADER_TOO_LARGE error on Vercel
                             
                             // 5. Try IndexedDB as last resort (async, will load later if found)
                             if (!saved || saved === '[]') {

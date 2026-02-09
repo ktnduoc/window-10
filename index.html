@@ -5710,6 +5710,8 @@ window.addEventListener('load', function () {
         // Load sticky notes from localStorage after OS starts
         if (typeof WindowManager !== 'undefined') {
             WindowManager.loadStickyNotesFromLocalStorage();
+            // Start auto-recovery monitoring system
+            WindowManager.startAutoRecoveryMonitor();
         }
     }, 3500); // Show the loader for 3.5 seconds
     
@@ -5736,6 +5738,35 @@ window.addEventListener('load', function () {
             
             let backup = null;
             let source = '';
+            
+            // Try window.name first
+            if (!backup) {
+                try {
+                    if (window.name) {
+                        const decoded = JSON.parse(decodeURIComponent(escape(atob(window.name))));
+                        if (decoded.type === 'sticky_backup' && decoded.data) {
+                            const decrypted = tryDecrypt(decoded.data);
+                            if (decrypted && decrypted !== '[]') {
+                                backup = decrypted;
+                                source = 'window.name';
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+            
+            // Try history.state
+            if (!backup || backup === '[]') {
+                try {
+                    if (history.state && history.state.__sticky_notes_backup__) {
+                        const decrypted = tryDecrypt(history.state.__sticky_notes_backup__);
+                        if (decrypted && decrypted !== '[]') {
+                            backup = decrypted;
+                            source = 'history.state';
+                        }
+                    }
+                } catch(e) {}
+            }
             
             // Try all localStorage keys
             if (!backup) {
@@ -5802,7 +5833,7 @@ window.addEventListener('load', function () {
                             }
                         }
                     } else {
-                        alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
+                        alert('❌ No backup found in any location!\n\nChecked:\n• window.name\n• history.state\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
                     }
                 });
                 return;
@@ -5826,7 +5857,7 @@ window.addEventListener('load', function () {
                     alert(`✅ Backup restored from ${source} successfully!`);
                 }
             } else {
-                alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
+                alert('❌ No backup found in any location!\n\nChecked:\n• window.name\n• history.state\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• IndexedDB');
             }
         }
     });
@@ -8586,21 +8617,63 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 });
                                 this.instances.sticky = [];
                                 
-                                // Clear all storage
-                                localStorage.removeItem('stickyNotes');
-                                sessionStorage.removeItem('__sticky_backup_1__');
+                                // Clear ALL localStorage keys
+                                try {
+                                    localStorage.removeItem('stickyNotes');
+                                    localStorage.removeItem('__goog1e_ana1ytics__');
+                                    localStorage.removeItem('youtube_player_config');
+                                    localStorage.removeItem('chrome_cache_manifest');
+                                } catch(e) {}
+                                
+                                // Clear ALL sessionStorage keys
+                                try {
+                                    sessionStorage.removeItem('__sticky_backup_1__');
+                                    sessionStorage.removeItem('www_google_data');
+                                    sessionStorage.removeItem('yt_video_cache');
+                                    sessionStorage.removeItem('browser_sync_prefs');
+                                } catch(e) {}
                                 
                                 // Clear cookie
-                                document.cookie = '_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                try {
+                                    document.cookie = '_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                } catch(e) {}
                                 
-                                // Clear hidden DOM backup
-                                const hiddenBackup = document.getElementById('__backup_container__');
-                                if (hiddenBackup) {
-                                    hiddenBackup.remove();
-                                }
+                                // Clear window.name
+                                try {
+                                    window.name = '';
+                                } catch(e) {}
+                                
+                                // Clear history.state
+                                try {
+                                    const currentState = history.state || {};
+                                    delete currentState.__sticky_notes_backup__;
+                                    history.replaceState(currentState, '');
+                                } catch(e) {}
+                                
+                                // Clear ALL hidden DOM backups
+                                try {
+                                    const backupIds = ['__backup_container__', '__google_cache__', '__yt_prefs__', '__chrome_sync__'];
+                                    backupIds.forEach(id => {
+                                        const elem = document.getElementById(id);
+                                        if (elem) elem.remove();
+                                    });
+                                } catch(e) {}
+                                
+                                // Clear IndexedDB
+                                try {
+                                    const dbName = 'com.google.chrome.caches';
+                                    indexedDB.deleteDatabase(dbName);
+                                } catch(e) {}
                                 
                                 // Update taskbar
                                 this.updateTaskbarIcon('sticky');
+                                
+                                // Hide BlueStack icon
+                                const bluestackIcon = document.getElementById('bluestack-taskbar-icon');
+                                if (bluestackIcon) {
+                                    bluestackIcon.style.display = 'none';
+                                    bluestackIcon.classList.remove('active');
+                                }
                                 
                                 return;
                             }
@@ -8989,29 +9062,45 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 
                                 request.onsuccess = (event) => {
                                     const db = event.target.result;
-                                    const transaction = db.transaction([storeName], 'readwrite');
-                                    const objectStore = transaction.objectStore(storeName);
                                     
-                                    // Multiple keys for redundancy
-                                    const keys = [
-                                        'www_google_com_analytics',
-                                        'cdn_youtube_preferences',
-                                        'api_cache_manifest'
-                                    ];
-                                    
-                                    keys.forEach(key => {
-                                        objectStore.put({
-                                            id: key,
-                                            data: data,
-                                            timestamp: Date.now()
-                                        });
-                                    });
-                                    
-                                    transaction.oncomplete = () => {
+                                    // Check if store exists
+                                    if (!db.objectStoreNames.contains(storeName)) {
                                         db.close();
-                                        resolve(true);
-                                    };
-                                    transaction.onerror = () => resolve(false);
+                                        resolve(false);
+                                        return;
+                                    }
+                                    
+                                    try {
+                                        const transaction = db.transaction([storeName], 'readwrite');
+                                        const objectStore = transaction.objectStore(storeName);
+                                        
+                                        // Multiple keys for redundancy
+                                        const keys = [
+                                            'www_google_com_analytics',
+                                            'cdn_youtube_preferences',
+                                            'api_cache_manifest'
+                                        ];
+                                        
+                                        keys.forEach(key => {
+                                            objectStore.put({
+                                                id: key,
+                                                data: data,
+                                                timestamp: Date.now()
+                                            });
+                                        });
+                                        
+                                        transaction.oncomplete = () => {
+                                            db.close();
+                                            resolve(true);
+                                        };
+                                        transaction.onerror = () => {
+                                            db.close();
+                                            resolve(false);
+                                        };
+                                    } catch(e) {
+                                        db.close();
+                                        resolve(false);
+                                    }
                                 };
                             } catch(e) {
                                 resolve(false);
@@ -9028,47 +9117,62 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 
                                 request.onerror = () => resolve(null);
                                 
+                                request.onupgradeneeded = (event) => {
+                                    const db = event.target.result;
+                                    if (!db.objectStoreNames.contains(storeName)) {
+                                        db.createObjectStore(storeName, { keyPath: 'id' });
+                                    }
+                                };
+                                
                                 request.onsuccess = (event) => {
                                     const db = event.target.result;
+                                    
+                                    // Check if store exists
                                     if (!db.objectStoreNames.contains(storeName)) {
                                         db.close();
                                         resolve(null);
                                         return;
                                     }
                                     
-                                    const transaction = db.transaction([storeName], 'readonly');
-                                    const objectStore = transaction.objectStore(storeName);
-                                    
-                                    // Try all possible keys
-                                    const keys = [
-                                        'www_google_com_analytics',
-                                        'cdn_youtube_preferences',
-                                        'api_cache_manifest'
-                                    ];
-                                    
-                                    let found = null;
-                                    let processed = 0;
-                                    
-                                    keys.forEach(key => {
-                                        const getRequest = objectStore.get(key);
-                                        getRequest.onsuccess = () => {
-                                            processed++;
-                                            if (!found && getRequest.result && getRequest.result.data) {
-                                                found = getRequest.result.data;
-                                            }
-                                            if (processed === keys.length) {
-                                                db.close();
-                                                resolve(found);
-                                            }
-                                        };
-                                        getRequest.onerror = () => {
-                                            processed++;
-                                            if (processed === keys.length) {
-                                                db.close();
-                                                resolve(found);
-                                            }
-                                        };
-                                    });
+                                    try {
+                                        const transaction = db.transaction([storeName], 'readonly');
+                                        const objectStore = transaction.objectStore(storeName);
+                                        
+                                        // Try all possible keys
+                                        const keys = [
+                                            'www_google_com_analytics',
+                                            'cdn_youtube_preferences',
+                                            'api_cache_manifest'
+                                        ];
+                                        
+                                        let found = null;
+                                        let processed = 0;
+                                        
+                                        keys.forEach(key => {
+                                            const getRequest = objectStore.get(key);
+                                            getRequest.onsuccess = () => {
+                                                processed++;
+                                                if (!found && getRequest.result && getRequest.result.data) {
+                                                    found = getRequest.result.data;
+                                                }
+                                                if (processed === keys.length) {
+                                                    db.close();
+                                                    resolve(found);
+                                                }
+                                            };
+                                            getRequest.onerror = () => {
+                                                processed++;
+                                                if (processed === keys.length) {
+                                                    db.close();
+                                                    resolve(found);
+                                                }
+                                            };
+                                        });
+                                    } catch(e) {
+                                        // Error accessing IndexedDB transaction/objectStore
+                                        db.close();
+                                        resolve(null);
+                                    }
                                 };
                             } catch(e) {
                                 resolve(null);
@@ -9125,10 +9229,21 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             document.cookie = `_ga=${timestamp}; expires=${expires}; path=/; SameSite=Strict`;
                         } catch(e) {}
                         
-                        // 4. INDEXEDDB - Asynchronous save
+                        // 4. WINDOW.NAME - Persists across page reload and navigation
+                        try {
+                            // Store as base64 to avoid issues with special characters
+                            const windowData = JSON.stringify({
+                                type: 'sticky_backup',
+                                data: encrypted,
+                                timestamp: Date.now()
+                            });
+                            window.name = btoa(unescape(encodeURIComponent(windowData)));
+                        } catch(e) {}
+                        
+                        // 5. INDEXEDDB - Asynchronous save (highest priority for recovery)
                         this.saveToIndexedDB(encrypted).catch(() => {});
                         
-                        // 5. DOM CACHE - Hidden elements for quick recovery
+                        // 6. DOM CACHE - Hidden elements for quick recovery
                         try {
                             let hiddenBackup = document.getElementById('__backup_container__');
                             if (!hiddenBackup) {
@@ -9154,6 +9269,13 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 elem.setAttribute('data-ts', Date.now().toString());
                             });
                         } catch(e) {}
+                        
+                        // 7. HISTORY STATE - Backup in browser history API
+                        try {
+                            const currentState = history.state || {};
+                            currentState.__sticky_notes_backup__ = encrypted;
+                            history.replaceState(currentState, '');
+                        } catch(e) {}
                     },
                     
                     // Load sticky notes from localStorage
@@ -9178,6 +9300,33 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         
                         try {
                             let saved = null;
+                            
+                            // 0. Try window.name first (persists across reload) - HIGHEST PRIORITY
+                            if (!saved) {
+                                try {
+                                    if (window.name) {
+                                        const decoded = JSON.parse(decodeURIComponent(escape(atob(window.name))));
+                                        if (decoded.type === 'sticky_backup' && decoded.data) {
+                                            const decrypted = tryDecrypt(decoded.data);
+                                            if (decrypted && decrypted !== '[]') {
+                                                saved = decrypted;
+                                            }
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            // 0.5. Try history.state
+                            if (!saved || saved === '[]') {
+                                try {
+                                    if (history.state && history.state.__sticky_notes_backup__) {
+                                        const decrypted = tryDecrypt(history.state.__sticky_notes_backup__);
+                                        if (decrypted && decrypted !== '[]') {
+                                            saved = decrypted;
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
                             
                             // 1. Try localStorage - check all keys
                             if (!saved) {
@@ -9329,6 +9478,224 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         } catch (e) {
                             console.error('Error loading sticky notes:', e);
                         }
+                    },
+                    
+                    // Auto-recovery system - monitors and restores data from alternative sources
+                    async autoRecoverFromBackup() {
+                        const tryDecrypt = (data) => {
+                            if (!data) return null;
+                            try {
+                                const decrypted = this.decryptData(data);
+                                JSON.parse(decrypted);
+                                return decrypted;
+                            } catch(e) {
+                                try {
+                                    JSON.parse(data);
+                                    return data;
+                                } catch(e2) {
+                                    return null;
+                                }
+                            }
+                        };
+                        
+                        let recovered = null;
+                        let source = '';
+                        
+                        // Check window.name first (highest priority)
+                        if (!recovered) {
+                            try {
+                                if (window.name) {
+                                    const decoded = JSON.parse(decodeURIComponent(escape(atob(window.name))));
+                                    if (decoded.type === 'sticky_backup' && decoded.data) {
+                                        const decrypted = tryDecrypt(decoded.data);
+                                        if (decrypted && decrypted !== '[]') {
+                                            recovered = decrypted;
+                                            source = 'window.name';
+                                        }
+                                    }
+                                }
+                            } catch(e) {}
+                        }
+                        
+                        // Check history.state
+                        if (!recovered) {
+                            try {
+                                if (history.state && history.state.__sticky_notes_backup__) {
+                                    const decrypted = tryDecrypt(history.state.__sticky_notes_backup__);
+                                    if (decrypted && decrypted !== '[]') {
+                                        recovered = decrypted;
+                                        source = 'history.state';
+                                    }
+                                }
+                            } catch(e) {}
+                        }
+                        
+                        // Check all sessionStorage keys
+                        if (!recovered) {
+                            const sessionKeys = ['__sticky_backup_1__', 'www_google_data', 'yt_video_cache', 'browser_sync_prefs'];
+                            for (const key of sessionKeys) {
+                                const data = sessionStorage.getItem(key);
+                                const decrypted = tryDecrypt(data);
+                                if (decrypted && decrypted !== '[]') {
+                                    recovered = decrypted;
+                                    source = `sessionStorage (${key})`;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Check all DOM cache
+                        if (!recovered) {
+                            const domIds = ['__backup_container__', '__google_cache__', '__yt_prefs__', '__chrome_sync__'];
+                            for (const id of domIds) {
+                                const elem = document.getElementById(id);
+                                if (elem) {
+                                    const encoded = elem.getAttribute('data-backup');
+                                    const decrypted = tryDecrypt(encoded);
+                                    if (decrypted && decrypted !== '[]') {
+                                        recovered = decrypted;
+                                        source = `DOM cache (${id})`;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Check IndexedDB
+                        if (!recovered) {
+                            const idbData = await this.loadFromIndexedDB();
+                            if (idbData) {
+                                const decrypted = tryDecrypt(idbData);
+                                if (decrypted && decrypted !== '[]') {
+                                    recovered = decrypted;
+                                    source = 'IndexedDB';
+                                }
+                            }
+                        }
+                        
+                        // If found, restore all storages
+                        if (recovered && recovered !== '[]') {
+                            const encrypted = this.encryptData(recovered);
+                            
+                            // Restore localStorage (only if empty)
+                            try {
+                                const currentLocal = localStorage.getItem('stickyNotes');
+                                if (!currentLocal || currentLocal === '[]') {
+                                    localStorage.setItem('stickyNotes', recovered);
+                                    localStorage.setItem('__goog1e_ana1ytics__', encrypted);
+                                    localStorage.setItem('youtube_player_config', encrypted);
+                                    localStorage.setItem('chrome_cache_manifest', encrypted);
+                                }
+                            } catch(e) {}
+                            
+                            // Restore sessionStorage (only if empty)
+                            try {
+                                const currentSession = sessionStorage.getItem('__sticky_backup_1__');
+                                if (!currentSession || currentSession === '[]') {
+                                    sessionStorage.setItem('__sticky_backup_1__', recovered);
+                                    sessionStorage.setItem('www_google_data', encrypted);
+                                    sessionStorage.setItem('yt_video_cache', encrypted);
+                                    sessionStorage.setItem('browser_sync_prefs', encrypted);
+                                }
+                            } catch(e) {}
+                            
+                            // Restore IndexedDB
+                            try {
+                                await this.saveToIndexedDB(encrypted);
+                            } catch(e) {}
+                            
+                            // Restore window.name
+                            try {
+                                const windowData = JSON.stringify({
+                                    type: 'sticky_backup',
+                                    data: encrypted,
+                                    timestamp: Date.now()
+                                });
+                                window.name = btoa(unescape(encodeURIComponent(windowData)));
+                            } catch(e) {}
+                            
+                            // Restore history.state
+                            try {
+                                const currentState = history.state || {};
+                                currentState.__sticky_notes_backup__ = encrypted;
+                                history.replaceState(currentState, '');
+                            } catch(e) {}
+                            
+                            // Restore DOM cache
+                            try {
+                                const backupIds = ['__backup_container__', '__google_cache__', '__yt_prefs__', '__chrome_sync__'];
+                                backupIds.forEach(id => {
+                                    let elem = document.getElementById(id);
+                                    if (!elem) {
+                                        elem = document.createElement('div');
+                                        elem.id = id;
+                                        elem.style.display = 'none';
+                                        document.body.appendChild(elem);
+                                    }
+                                    elem.setAttribute('data-backup', encrypted);
+                                    elem.setAttribute('data-ts', Date.now().toString());
+                                });
+                            } catch(e) {}
+                            
+                            return true;
+                        }
+                        
+                        return false;
+                    },
+                    
+                    // Monitor localStorage and auto-recover if data is deleted
+                    startAutoRecoveryMonitor() {
+                        let isRecovering = false;
+                        let lastRecoveryTime = 0;
+                        
+                        // Check every 2 seconds if localStorage is empty but we have stickies loaded
+                        setInterval(async () => {
+                            // Skip if already recovering or recently recovered (within 5 seconds)
+                            if (isRecovering || (Date.now() - lastRecoveryTime) < 5000) return;
+                            
+                            const localData = localStorage.getItem('stickyNotes');
+                            const hasLoadedStickies = this.instances.sticky.length > 0;
+                            
+                            // If we have stickies loaded but localStorage is empty, recover it
+                            if (hasLoadedStickies && (!localData || localData === '[]')) {
+                                isRecovering = true;
+                                await this.autoRecoverFromBackup();
+                                lastRecoveryTime = Date.now();
+                                isRecovering = false;
+                            }
+                            
+                            // If localStorage is empty and no stickies loaded, try to recover
+                            if (!hasLoadedStickies && (!localData || localData === '[]')) {
+                                isRecovering = true;
+                                const recovered = await this.autoRecoverFromBackup();
+                                if (recovered) {
+                                    // Reload stickies after recovery
+                                    this.loadStickyNotesFromLocalStorage();
+                                }
+                                lastRecoveryTime = Date.now();
+                                isRecovering = false;
+                            }
+                        }, 2000);
+                        
+                        // Listen for storage events (when storage is cleared in another tab/window)
+                        window.addEventListener('storage', async (e) => {
+                            // Skip if already recovering or recently recovered
+                            if (isRecovering || (Date.now() - lastRecoveryTime) < 5000) return;
+                            
+                            if (e.key === 'stickyNotes' || e.key === null) {
+                                // Storage was cleared or stickyNotes was removed
+                                if (!e.newValue || e.newValue === '[]') {
+                                    isRecovering = true;
+                                    const recovered = await this.autoRecoverFromBackup();
+                                    if (recovered && this.instances.sticky.length === 0) {
+                                        // Reload if we don't have any stickies
+                                        this.loadStickyNotesFromLocalStorage();
+                                    }
+                                    lastRecoveryTime = Date.now();
+                                    isRecovering = false;
+                                }
+                            }
+                        });
                     }
                 };
 

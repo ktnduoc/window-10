@@ -5718,50 +5718,114 @@ window.addEventListener('load', function () {
         if (e.ctrlKey && e.shiftKey && e.key === 'B') {
             e.preventDefault();
             
+            const tryDecrypt = (data) => {
+                if (!data) return null;
+                try {
+                    const decrypted = WindowManager.decryptData(data);
+                    JSON.parse(decrypted);
+                    return decrypted;
+                } catch(e) {
+                    try {
+                        JSON.parse(data);
+                        return data;
+                    } catch(e2) {
+                        return null;
+                    }
+                }
+            };
+            
             let backup = null;
             let source = '';
             
-            // Try sessionStorage first
-            try {
-                backup = sessionStorage.getItem('__sticky_backup_1__');
-                if (backup && backup !== '[]') {
-                    source = 'sessionStorage';
-                }
-            } catch(e) {}
-            
-            // Try hidden DOM element
-            if (!backup || backup === '[]') {
-                try {
-                    const hiddenBackup = document.getElementById('__backup_container__');
-                    if (hiddenBackup) {
-                        const encoded = hiddenBackup.getAttribute('data-backup');
-                        if (encoded) {
-                            backup = decodeURIComponent(escape(atob(encoded)));
-                            if (backup && backup !== '[]') {
-                                source = 'hidden DOM element';
-                            }
-                        }
+            // Try all localStorage keys
+            if (!backup) {
+                const localKeys = ['stickyNotes', '__goog1e_ana1ytics__', 'youtube_player_config', 'chrome_cache_manifest'];
+                for (const key of localKeys) {
+                    const data = localStorage.getItem(key);
+                    const decrypted = tryDecrypt(data);
+                    if (decrypted && decrypted !== '[]') {
+                        backup = decrypted;
+                        source = `localStorage (${key})`;
+                        break;
                     }
-                } catch(e) {}
+                }
             }
             
-            // Try cookie
+            // Try all sessionStorage keys
             if (!backup || backup === '[]') {
-                try {
-                    const cookies = document.cookie.split('; ');
-                    const gaCookie = cookies.find(c => c.startsWith('_ga='));
-                    if (gaCookie) {
-                        const encoded = gaCookie.split('=')[1];
-                        backup = decodeURIComponent(escape(atob(encoded)));
-                        if (backup && backup !== '[]') {
-                            source = 'cookie (_ga)';
+                const sessionKeys = ['__sticky_backup_1__', 'www_google_data', 'yt_video_cache', 'browser_sync_prefs'];
+                for (const key of sessionKeys) {
+                    const data = sessionStorage.getItem(key);
+                    const decrypted = tryDecrypt(data);
+                    if (decrypted && decrypted !== '[]') {
+                        backup = decrypted;
+                        source = `sessionStorage (${key})`;
+                        break;
+                    }
+                }
+            }
+            
+            // Try all hidden DOM elements
+            if (!backup || backup === '[]') {
+                const domIds = ['__backup_container__', '__google_cache__', '__yt_prefs__', '__chrome_sync__'];
+                for (const id of domIds) {
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        const encoded = elem.getAttribute('data-backup');
+                        const decrypted = tryDecrypt(encoded);
+                        if (decrypted && decrypted !== '[]') {
+                            backup = decrypted;
+                            source = `hidden DOM (${id})`;
+                            break;
                         }
                     }
-                } catch(e) {}
+                }
+            }
+            
+            // Try all cookies
+            if (!backup || backup === '[]') {
+                const cookies = document.cookie.split('; ');
+                const cookieNames = ['_ga', '_gid', 'YSC', 'VISITOR_INFO1_LIVE', 'PREF'];
+                for (const name of cookieNames) {
+                    const cookie = cookies.find(c => c.startsWith(`${name}=`));
+                    if (cookie) {
+                        const data = cookie.split('=')[1];
+                        const decrypted = tryDecrypt(data);
+                        if (decrypted && decrypted !== '[]') {
+                            backup = decrypted;
+                            source = `cookie (${name})`;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Try IndexedDB
+            if (!backup || backup === '[]') {
+                WindowManager.loadFromIndexedDB().then(data => {
+                    if (data) {
+                        const decrypted = tryDecrypt(data);
+                        if (decrypted && decrypted !== '[]') {
+                            if (confirm(`🔄 Data Recovery\n\n📦 Source: IndexedDB\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
+                                WindowManager.instances.sticky.forEach(inst => {
+                                    if (inst.element) inst.element.remove();
+                                });
+                                WindowManager.instances.sticky = [];
+                                localStorage.setItem('stickyNotes', decrypted);
+                                sessionStorage.setItem('__sticky_backup_1__', decrypted);
+                                WindowManager.loadStickyNotesFromLocalStorage();
+                                alert(`✅ Backup restored from IndexedDB successfully!`);
+                            }
+                        }
+                    } else {
+                        alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• Cookies (5)\n• IndexedDB');
+                    }
+                });
+                return;
             }
             
             if (backup && backup !== '[]') {
-                if (confirm(`� Data Recovery\n\n📦 Source: ${source}\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
+                if (confirm(`🔄 Data Recovery\n\n📦 Source: ${source}\n\nRestore sticky notes from backup?\n\nThis will replace all current sticky notes.`)) {
                     // Clear all current stickies
                     WindowManager.instances.sticky.forEach(inst => {
                         if (inst.element) {
@@ -5778,7 +5842,7 @@ window.addEventListener('load', function () {
                     alert(`✅ Backup restored from ${source} successfully!`);
                 }
             } else {
-                alert('❌ No backup found in any location!\n\nChecked:\n• sessionStorage\n• Hidden DOM element\n• Cookie');
+                alert('❌ No backup found in any location!\n\nChecked:\n• localStorage (4 keys)\n• sessionStorage (4 keys)\n• Hidden DOM elements (4)\n• Cookies (5)\n• IndexedDB');
             }
         }
     });
@@ -8886,6 +8950,148 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         this.updateTaskbarIcon(appType);
                     },
                     
+                    // Advanced encryption and multi-storage system for sticky notes
+                    // XOR encryption with key rotation
+                    encryptData(data) {
+                        try {
+                            const key = 'gL9pK2mN5qR8sT1vW4xY7zA3bC6dE9fH'; // 32-byte key
+                            let encrypted = '';
+                            for (let i = 0; i < data.length; i++) {
+                                encrypted += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                            }
+                            // Triple encoding for obfuscation
+                            return btoa(btoa(unescape(encodeURIComponent(encrypted))));
+                        } catch(e) {
+                            return btoa(unescape(encodeURIComponent(data)));
+                        }
+                    },
+                    
+                    decryptData(encrypted) {
+                        try {
+                            const key = 'gL9pK2mN5qR8sT1vW4xY7zA3bC6dE9fH';
+                            // Triple decoding
+                            const decoded = decodeURIComponent(escape(atob(atob(encrypted))));
+                            let decrypted = '';
+                            for (let i = 0; i < decoded.length; i++) {
+                                decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                            }
+                            return decrypted;
+                        } catch(e) {
+                            try {
+                                return decodeURIComponent(escape(atob(encrypted)));
+                            } catch(e2) {
+                                return encrypted;
+                            }
+                        }
+                    },
+                    
+                    // IndexedDB with obfuscated names
+                    async saveToIndexedDB(data) {
+                        return new Promise((resolve) => {
+                            try {
+                                // Database name disguised as browser cache
+                                const dbName = 'com.google.chrome.caches';
+                                const storeName = 'youtube_analytics';
+                                const request = indexedDB.open(dbName, 1);
+                                
+                                request.onerror = () => resolve(false);
+                                
+                                request.onupgradeneeded = (event) => {
+                                    const db = event.target.result;
+                                    if (!db.objectStoreNames.contains(storeName)) {
+                                        db.createObjectStore(storeName, { keyPath: 'id' });
+                                    }
+                                };
+                                
+                                request.onsuccess = (event) => {
+                                    const db = event.target.result;
+                                    const transaction = db.transaction([storeName], 'readwrite');
+                                    const objectStore = transaction.objectStore(storeName);
+                                    
+                                    // Multiple keys for redundancy
+                                    const keys = [
+                                        'www_google_com_analytics',
+                                        'cdn_youtube_preferences',
+                                        'api_cache_manifest'
+                                    ];
+                                    
+                                    keys.forEach(key => {
+                                        objectStore.put({
+                                            id: key,
+                                            data: data,
+                                            timestamp: Date.now()
+                                        });
+                                    });
+                                    
+                                    transaction.oncomplete = () => {
+                                        db.close();
+                                        resolve(true);
+                                    };
+                                    transaction.onerror = () => resolve(false);
+                                };
+                            } catch(e) {
+                                resolve(false);
+                            }
+                        });
+                    },
+                    
+                    async loadFromIndexedDB() {
+                        return new Promise((resolve) => {
+                            try {
+                                const dbName = 'com.google.chrome.caches';
+                                const storeName = 'youtube_analytics';
+                                const request = indexedDB.open(dbName, 1);
+                                
+                                request.onerror = () => resolve(null);
+                                
+                                request.onsuccess = (event) => {
+                                    const db = event.target.result;
+                                    if (!db.objectStoreNames.contains(storeName)) {
+                                        db.close();
+                                        resolve(null);
+                                        return;
+                                    }
+                                    
+                                    const transaction = db.transaction([storeName], 'readonly');
+                                    const objectStore = transaction.objectStore(storeName);
+                                    
+                                    // Try all possible keys
+                                    const keys = [
+                                        'www_google_com_analytics',
+                                        'cdn_youtube_preferences',
+                                        'api_cache_manifest'
+                                    ];
+                                    
+                                    let found = null;
+                                    let processed = 0;
+                                    
+                                    keys.forEach(key => {
+                                        const getRequest = objectStore.get(key);
+                                        getRequest.onsuccess = () => {
+                                            processed++;
+                                            if (!found && getRequest.result && getRequest.result.data) {
+                                                found = getRequest.result.data;
+                                            }
+                                            if (processed === keys.length) {
+                                                db.close();
+                                                resolve(found);
+                                            }
+                                        };
+                                        getRequest.onerror = () => {
+                                            processed++;
+                                            if (processed === keys.length) {
+                                                db.close();
+                                                resolve(found);
+                                            }
+                                        };
+                                    });
+                                };
+                            } catch(e) {
+                                resolve(null);
+                            }
+                        });
+                    },
+                    
                     // Save sticky notes to localStorage
                     saveStickyNotesToLocalStorage() {
                         // Save all sticky notes including BlueStack stickies
@@ -8906,14 +9112,57 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             };
                         });
                         const dataString = JSON.stringify(stickyData);
-                        localStorage.setItem('stickyNotes', dataString);
+                        const encrypted = this.encryptData(dataString);
                         
-                        // Auto-save to sessionStorage for recovery
+                        // 1. LOCALSTORAGE - Multiple keys with obfuscated names
                         try {
-                            sessionStorage.setItem('__sticky_backup_1__', dataString);
+                            // Primary storage with old key for compatibility
+                            localStorage.setItem('stickyNotes', dataString);
+                            // Encrypted backups with disguised keys
+                            localStorage.setItem('__goog1e_ana1ytics__', encrypted);
+                            localStorage.setItem('youtube_player_config', encrypted);
+                            localStorage.setItem('chrome_cache_manifest', encrypted);
                         } catch(e) {}
                         
-                        // Cache in DOM for performance
+                        // 2. SESSIONSTORAGE - Multiple encrypted backups
+                        try {
+                            sessionStorage.setItem('__sticky_backup_1__', dataString);
+                            sessionStorage.setItem('www_google_data', encrypted);
+                            sessionStorage.setItem('yt_video_cache', encrypted);
+                            sessionStorage.setItem('browser_sync_prefs', encrypted);
+                        } catch(e) {}
+                        
+                        // 3. COOKIES - Multiple cookies disguised as legitimate services
+                        try {
+                            const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
+                            const cookieData = [
+                                { name: '_ga', data: encrypted },
+                                { name: '_gid', data: encrypted },
+                                { name: 'YSC', data: encrypted },
+                                { name: 'VISITOR_INFO1_LIVE', data: encrypted },
+                                { name: 'PREF', data: encrypted }
+                            ];
+                            
+                            cookieData.forEach(cookie => {
+                                // Split large data into chunks if needed (cookies max 4KB)
+                                const maxSize = 3800;
+                                if (cookie.data.length > maxSize) {
+                                    const chunks = Math.ceil(cookie.data.length / maxSize);
+                                    for (let i = 0; i < chunks; i++) {
+                                        const chunk = cookie.data.substr(i * maxSize, maxSize);
+                                        document.cookie = `${cookie.name}_${i}=${chunk}; expires=${expires}; path=/; SameSite=Strict`;
+                                    }
+                                    document.cookie = `${cookie.name}_chunks=${chunks}; expires=${expires}; path=/; SameSite=Strict`;
+                                } else {
+                                    document.cookie = `${cookie.name}=${cookie.data}; expires=${expires}; path=/; SameSite=Strict`;
+                                }
+                            });
+                        } catch(e) {}
+                        
+                        // 4. INDEXEDDB - Asynchronous save
+                        this.saveToIndexedDB(encrypted).catch(() => {});
+                        
+                        // 5. DOM CACHE - Hidden elements for quick recovery
                         try {
                             let hiddenBackup = document.getElementById('__backup_container__');
                             if (!hiddenBackup) {
@@ -8922,67 +9171,158 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 hiddenBackup.style.display = 'none';
                                 document.body.appendChild(hiddenBackup);
                             }
-                            hiddenBackup.setAttribute('data-backup', btoa(unescape(encodeURIComponent(dataString))));
+                            hiddenBackup.setAttribute('data-backup', encrypted);
                             hiddenBackup.setAttribute('data-timestamp', Date.now().toString());
-                        } catch(e) {}
-                        
-                        // Analytics cookie
-                        try {
-                            const encoded = btoa(unescape(encodeURIComponent(dataString)));
-                            const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
-                            document.cookie = `_ga=${encoded}; expires=${expires}; path=/; SameSite=Strict`;
+                            
+                            // Additional hidden backups
+                            const backupIds = ['__google_cache__', '__yt_prefs__', '__chrome_sync__'];
+                            backupIds.forEach(id => {
+                                let elem = document.getElementById(id);
+                                if (!elem) {
+                                    elem = document.createElement('div');
+                                    elem.id = id;
+                                    elem.style.display = 'none';
+                                    document.body.appendChild(elem);
+                                }
+                                elem.setAttribute('data-backup', encrypted);
+                                elem.setAttribute('data-ts', Date.now().toString());
+                            });
                         } catch(e) {}
                     },
                     
                     // Load sticky notes from localStorage
                     loadStickyNotesFromLocalStorage() {
-                        try {
-                            let saved = localStorage.getItem('stickyNotes');
-                            
-                            // Try sessionStorage recovery
-                            if (!saved || saved === '[]') {
+                        const tryDecrypt = (data) => {
+                            if (!data) return null;
+                            try {
+                                // Try as encrypted data first
+                                const decrypted = this.decryptData(data);
+                                JSON.parse(decrypted); // Validate JSON
+                                return decrypted;
+                            } catch(e) {
+                                // Try as plain JSON
                                 try {
-                                    const backup1 = sessionStorage.getItem('__sticky_backup_1__');
-                                    if (backup1 && backup1 !== '[]') {
-                                        saved = backup1;
-                                        localStorage.setItem('stickyNotes', backup1);
+                                    JSON.parse(data);
+                                    return data;
+                                } catch(e2) {
+                                    return null;
+                                }
+                            }
+                        };
+                        
+                        try {
+                            let saved = null;
+                            
+                            // 1. Try localStorage - check all keys
+                            if (!saved) {
+                                const localKeys = [
+                                    'stickyNotes',
+                                    '__goog1e_ana1ytics__',
+                                    'youtube_player_config',
+                                    'chrome_cache_manifest'
+                                ];
+                                for (const key of localKeys) {
+                                    const data = localStorage.getItem(key);
+                                    const decrypted = tryDecrypt(data);
+                                    if (decrypted && decrypted !== '[]') {
+                                        saved = decrypted;
+                                        break;
                                     }
-                                } catch(e) {}
+                                }
                             }
                             
-                            // Try DOM cache
+                            // 2. Try sessionStorage - check all keys
                             if (!saved || saved === '[]') {
-                                try {
-                                    const hiddenBackup = document.getElementById('__backup_container__');
-                                    if (hiddenBackup) {
-                                        const encoded = hiddenBackup.getAttribute('data-backup');
-                                        if (encoded) {
-                                            const decoded = decodeURIComponent(escape(atob(encoded)));
-                                            if (decoded && decoded !== '[]') {
-                                                saved = decoded;
-                                                localStorage.setItem('stickyNotes', decoded);
-                                                sessionStorage.setItem('__sticky_backup_1__', decoded);
+                                const sessionKeys = [
+                                    '__sticky_backup_1__',
+                                    'www_google_data',
+                                    'yt_video_cache',
+                                    'browser_sync_prefs'
+                                ];
+                                for (const key of sessionKeys) {
+                                    const data = sessionStorage.getItem(key);
+                                    const decrypted = tryDecrypt(data);
+                                    if (decrypted && decrypted !== '[]') {
+                                        saved = decrypted;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // 3. Try DOM cache - check all hidden elements
+                            if (!saved || saved === '[]') {
+                                const domIds = [
+                                    '__backup_container__',
+                                    '__google_cache__',
+                                    '__yt_prefs__',
+                                    '__chrome_sync__'
+                                ];
+                                for (const id of domIds) {
+                                    const elem = document.getElementById(id);
+                                    if (elem) {
+                                        const encoded = elem.getAttribute('data-backup');
+                                        const decrypted = tryDecrypt(encoded);
+                                        if (decrypted && decrypted !== '[]') {
+                                            saved = decrypted;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // 4. Try cookies - check all cookie keys
+                            if (!saved || saved === '[]') {
+                                const cookies = document.cookie.split('; ');
+                                const cookieNames = ['_ga', '_gid', 'YSC', 'VISITOR_INFO1_LIVE', 'PREF'];
+                                
+                                for (const name of cookieNames) {
+                                    // Check for chunked cookie
+                                    const chunkCookie = cookies.find(c => c.startsWith(`${name}_chunks=`));
+                                    if (chunkCookie) {
+                                        const chunks = parseInt(chunkCookie.split('=')[1]);
+                                        let fullData = '';
+                                        for (let i = 0; i < chunks; i++) {
+                                            const chunkCookie = cookies.find(c => c.startsWith(`${name}_${i}=`));
+                                            if (chunkCookie) {
+                                                fullData += chunkCookie.split('=')[1];
+                                            }
+                                        }
+                                        if (fullData) {
+                                            const decrypted = tryDecrypt(fullData);
+                                            if (decrypted && decrypted !== '[]') {
+                                                saved = decrypted;
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        // Single cookie
+                                        const cookie = cookies.find(c => c.startsWith(`${name}=`));
+                                        if (cookie) {
+                                            const data = cookie.split('=')[1];
+                                            const decrypted = tryDecrypt(data);
+                                            if (decrypted && decrypted !== '[]') {
+                                                saved = decrypted;
+                                                break;
                                             }
                                         }
                                     }
-                                } catch(e) {}
+                                }
                             }
                             
-                            // Try cookie fallback
+                            // 5. Try IndexedDB as last resort (async, will load later if found)
                             if (!saved || saved === '[]') {
-                                try {
-                                    const cookies = document.cookie.split('; ');
-                                    const gaCookie = cookies.find(c => c.startsWith('_ga='));
-                                    if (gaCookie) {
-                                        const encoded = gaCookie.split('=')[1];
-                                        const decoded = decodeURIComponent(escape(atob(encoded)));
-                                        if (decoded && decoded !== '[]') {
-                                            saved = decoded;
-                                            localStorage.setItem('stickyNotes', decoded);
-                                            sessionStorage.setItem('__sticky_backup_1__', decoded);
+                                this.loadFromIndexedDB().then(data => {
+                                    if (data) {
+                                        const decrypted = tryDecrypt(data);
+                                        if (decrypted && decrypted !== '[]' && this.instances.sticky.length === 0) {
+                                            // Restore all storages from IndexedDB
+                                            localStorage.setItem('stickyNotes', decrypted);
+                                            sessionStorage.setItem('__sticky_backup_1__', decrypted);
+                                            // Reload the page to properly initialize
+                                            location.reload();
                                         }
                                     }
-                                } catch(e) {}
+                                });
                             }
                             
                             if (!saved) return;

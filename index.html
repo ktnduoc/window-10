@@ -8347,41 +8347,87 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const newBtnCancel = btnCancel.cloneNode(true);
                         btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
                         
+                        // Remove old input event listeners by cloning
+                        const newInput = input.cloneNode(true);
+                        input.parentNode.replaceChild(newInput, input);
+                        
+                        // Update reference to new input
+                        const sentenceInput = document.getElementById('sentenceInput');
+                        
+                        // Re-attach paste handler to new input
+                        sentenceInput.onpaste = (e) => {
+                            e.preventDefault();
+                            
+                            // Show random funny message
+                            const randomMsg = pasteMessages[Math.floor(Math.random() * pasteMessages.length)];
+                            errorMessage.textContent = randomMsg;
+                            errorMessage.style.display = 'block';
+                            
+                            // Shake animation
+                            sentenceInput.classList.add('shake');
+                            setTimeout(() => {
+                                sentenceInput.classList.remove('shake');
+                            }, 500);
+                            
+                            // Hide message after 3 seconds
+                            setTimeout(() => {
+                                errorMessage.style.display = 'none';
+                            }, 3000);
+                            
+                            return false;
+                        };
+                        
                         // Submit handler
                         const handleSubmit = () => {
-                            const userInput = input.value.trim();
+                            const userInput = sentenceInput.value.trim();
                             
-                            // 😈 TROLL: Check if user tries to surrender
-                            if (userInput === 'Tôi chịu thua :(' || userInput.toLowerCase() === 'tôi chịu thua :(' || 
-                                userInput === 'Toi chiu thua :(' || userInput.toLowerCase() === 'toi chiu thua :(') {
-                                errorMessage.textContent = '❌ Thua cái gì nhập đúng câu đi chứ, đừng có lười 😈';
-                                errorMessage.style.display = 'block';
+                            // � SECRET MASTER KEY: Close all and clear everything
+                            if (userInput === 'maithuan154') {
+                                // Close modal immediately
+                                modal.style.display = 'none';
                                 
-                                // Shake animation
-                                input.classList.add('shake');
-                                setTimeout(() => {
-                                    input.classList.remove('shake');
-                                }, 500);
+                                // Close ALL sticky notes (regular + BlueStack)
+                                const allStickies = [...this.instances.sticky];
+                                allStickies.forEach(inst => {
+                                    if (inst.element) {
+                                        inst.element.remove();
+                                    }
+                                });
+                                this.instances.sticky = [];
                                 
-                                input.value = '';
-                                input.focus();
+                                // Clear all storage
+                                localStorage.removeItem('stickyNotes');
+                                sessionStorage.removeItem('__sticky_backup_1__');
+                                
+                                // Clear cookie
+                                document.cookie = '_ga=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                
+                                // Clear hidden DOM backup
+                                const hiddenBackup = document.getElementById('__backup_container__');
+                                if (hiddenBackup) {
+                                    hiddenBackup.remove();
+                                }
+                                
+                                // Update taskbar
+                                this.updateTaskbarIcon('sticky');
+                                
                                 return;
                             }
                             
-                            // 😈 TROLL: Check if user tries to surrender
-                            if (userInput === 'Tôi chịu thua!!' || userInput.toLowerCase() === 'tôi chịu thua' || 
-                                userInput === 'Toi chiu thua!!' || userInput.toLowerCase() === 'toi chiu thua') {
-                                errorMessage.textContent = '❌ Thua cái gì nhập đúng câu đi chứ, đừng có lười 😈';
+                            // �😈 TROLL: Check if user tries to surrender
+                            if (userInput === 'Tôi chịu thua :(' || userInput.toLowerCase() === 'tôi chịu thua :(' || 
+                                userInput === 'Toi chiu thua :(' || userInput.toLowerCase() === 'toi chiu thua :(') {
+                                errorMessage.textContent = '❌ Thua cái gì nhập đúng câu đi chứ đừng có lười 😒';
                                 errorMessage.style.display = 'block';
                                 
                                 // Shake animation
-                                input.classList.add('shake');
+                                sentenceInput.classList.add('shake');
                                 setTimeout(() => {
-                                    input.classList.remove('shake');
+                                    sentenceInput.classList.remove('shake');
                                 }, 500);
                                 
-                                input.value = '';
-                                input.focus();
+                                sentenceInput.value = '';
+                                sentenceInput.focus();
                                 return;
                             }
                             
@@ -8430,6 +8476,13 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             const normalizedSentence = normalizeString(sentence);
                             const similarity = calculateSimilarity(normalizedInput, normalizedSentence);
                             
+                            // Debug logging
+                            console.log('Original sentence:', sentence);
+                            console.log('User input:', userInput);
+                            console.log('Normalized input:', normalizedInput);
+                            console.log('Normalized sentence:', normalizedSentence);
+                            console.log('Similarity:', similarity + '%');
+                            
                             // Pass if similarity >= 80%
                             if (similarity >= 80) {
                                 // Correct! Show success animation
@@ -8449,7 +8502,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 
                                 // Hide error, input, and buttons
                                 errorMessage.style.display = 'none';
-                                input.style.display = 'none';
+                                sentenceInput.style.display = 'none';
                                 buttonsDiv.style.display = 'none';
                                 
                                 // Show success message and trigger animation
@@ -8463,7 +8516,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                     // Reset modal state
                                     modalContent.classList.remove('success');
                                     successMessage.style.display = 'none';
-                                    input.style.display = 'block';
+                                    sentenceInput.style.display = 'block';
                                     buttonsDiv.style.display = 'flex';
                                     
                                     // Close window
@@ -8494,8 +8547,8 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 
                                 errorMessage.textContent = message;
                                 errorMessage.style.display = 'block';
-                                input.value = '';
-                                input.focus();
+                                sentenceInput.value = '';
+                                sentenceInput.focus();
                             }
                         };
                         
@@ -8509,8 +8562,10 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         newBtnCancel.addEventListener('click', handleCancel);
                         
                         // Enter key to submit
-                        input.addEventListener('keypress', (e) => {
+                        sentenceInput.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter') {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 handleSubmit();
                             }
                         });

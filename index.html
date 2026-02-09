@@ -3944,93 +3944,168 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 999999;
             justify-content: center;
             align-items: center;
         }
         
         .english-validation-content {
-            background: #2b2b2b;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            min-width: 400px;
-            max-width: 600px;
+            background: white;
+            border-radius: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            min-width: 450px;
+            max-width: 650px;
+            color: #000;
+            border: 1px solid #0078d7;
+            border-top: 2px solid #0078d7;
+            overflow: hidden;
+        }
+
+        .english-validation-title {
+            background: white;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .english-validation-title-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 400;
+        }
+
+        .english-validation-title-text::before {
+            content: "🎓";
+            font-size: 16px;
+        }
+
+        .english-validation-close {
+            width: 46px;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #000;
+            transition: background 0.15s, color 0.15s;
+            padding: 0;
+            margin: 0;
+        }
+
+        .english-validation-close:hover {
+            background: #e81123;
             color: white;
+        }
+
+        .english-validation-close:active {
+            background: #c50d1d;
+            color: white;
+        }
+
+        .english-validation-body {
+            padding: 20px;
         }
         
         .english-validation-content h3 {
             margin-top: 0;
-            margin-bottom: 15px;
-            color: #fff;
+            margin-bottom: 12px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 600;
         }
         
         .english-validation-content .sentence-display {
-            background: #1e1e1e;
+            background: #f0f0f0;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 0;
             margin-bottom: 15px;
-            font-size: 16px;
+            font-size: 15px;
             font-style: italic;
-            border-left: 4px solid #007acc;
+            border-left: 3px solid #0078d7;
+            color: #000;
         }
         
         .english-validation-content input {
             width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 2px solid #444;
-            border-radius: 4px;
-            background: #1e1e1e;
-            color: white;
+            padding: 8px 10px;
+            font-size: 13px;
+            border: 1px solid #ababab;
+            border-radius: 0;
+            background: white;
+            color: #000;
             box-sizing: border-box;
             margin-bottom: 15px;
+            font-family: 'Segoe UI', sans-serif;
         }
         
         .english-validation-content input:focus {
             outline: none;
-            border-color: #007acc;
+            border-color: #0078d7;
+            box-shadow: 0 0 0 1px #0078d7;
         }
         
         .english-validation-content .buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: flex-end;
+            padding-top: 10px;
         }
         
         .english-validation-content button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
+            padding: 4px 4px;
+            border-radius: 0;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
+            font-family: 'Segoe UI', sans-serif;
+            min-width: 30px;
         }
         
         .english-validation-content .btn-submit {
-            background: #007acc;
+            background: #0078d7;
             color: white;
+            border-color: #0078d7;
         }
         
         .english-validation-content .btn-submit:hover {
             background: #005a9e;
+            border-color: #005a9e;
         }
         
         .english-validation-content .btn-cancel {
-            background: #444;
-            color: white;
+            background: #e1e1e1;
+            color: #000;
         }
         
         .english-validation-content .btn-cancel:hover {
-            background: #555;
+            background: #d8d8d8;
         }
         
         .english-validation-content .error-message {
-            color: #f44336;
-            font-size: 12px;
+            color: #d13438;
+            font-size: 11px;
             margin-top: -10px;
             margin-bottom: 10px;
             display: none;
+            background: #fef0f0;
+            padding: 8px;
+            border-left: 3px solid #d13438;
+        }
+
+        .english-validation-content .hint-text {
+            font-size: 11px;
+            color: #666;
+            margin: 5px 0 10px 0;
+            font-style: italic;
         }
         
         /* Shake animation for paste attempt */
@@ -4046,12 +4121,15 @@
         }
         
         .english-validation-content .success-message {
-            color: #4caf50;
-            font-size: 14px;
-            font-weight: bold;
+            color: #107c10;
+            font-size: 13px;
+            font-weight: 600;
             text-align: center;
             display: none;
             margin-top: 10px;
+            background: #dff6dd;
+            padding: 10px;
+            border-left: 3px solid #107c10;
         }
         
         .english-validation-content.success {
@@ -4080,17 +4158,24 @@
     <!-- English Validation Modal -->
     <div class="english-validation-modal" id="englishValidationModal">
         <div class="english-validation-content">
-            <h3>🎓 Type the sentence to close</h3>
-            <div class="sentence-display" id="sentenceDisplay"></div>
-            <p style="font-size: 11px; color: #888; margin: 5px 0 10px 0; font-style: italic;">
-                💡 Hint: Type the sentence above or "Tôi chịu thua :(" to give up
-            </p>
-            <input type="text" id="sentenceInput" placeholder="Type the sentence or 'Tôi chịu thua :('..." autocomplete="off" />
-            <div class="error-message" id="errorMessage">❌ Incorrect! Try again.</div>
-            <div class="success-message" id="successMessage">✅ Perfect! Closing...</div>
-            <div class="buttons">
-                <button class="btn-cancel" id="btnCancelValidation">Cancel</button>
-                <button class="btn-submit" id="btnSubmitValidation">Submit</button>
+            <div class="english-validation-title">
+                <div class="english-validation-title-text">Type the sentence to close</div>
+                <button class="english-validation-close" id="btnCloseValidation" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="english-validation-body">
+                <div class="sentence-display" id="sentenceDisplay"></div>
+                <p class="hint-text">
+                    💡 Hint: Type the sentence above or "Tôi chịu thua :(" to give up
+                </p>
+                <input type="text" id="sentenceInput" placeholder="Type the sentence or 'Tôi chịu thua :('..." autocomplete="off" />
+                <div class="error-message" id="errorMessage">❌ Incorrect! Try again.</div>
+                <div class="success-message" id="successMessage">✅ Perfect! Closing...</div>
+                <div class="buttons">
+                    <button class="btn-submit" id="btnSubmitValidation">OK</button>
+                    <button class="btn-cancel" id="btnCancelValidation">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
@@ -7280,6 +7365,7 @@ window.addEventListener('load', function () {
                             document.onmouseup = null;
                             document.onmousemove = null;
                             element.classList.remove('dragging');
+                            element.style.zIndex = "10"; // Reset to default icon z-index
                             if (trashShortcut && isOverlapping(element, trashShortcut)) {
                                 element.style.display = 'none';
                                 deletedItems.push({
@@ -7504,14 +7590,63 @@ window.addEventListener('load', function () {
                             const win = document.getElementById('trash-window');
                             win.style.display = 'flex';
                             win.classList.add('active');
+                            win.style.zIndex = '5000'; // Ensure window is above desktop icons
                         });
                     }
 
                     document.getElementById('restore-all-btn').addEventListener('click', restoreAllItems);
                     document.getElementById('empty-trash-btn').addEventListener('click', emptyTrash);
-                    document.getElementById('trash-close').addEventListener('click', () => {
-                        document.getElementById('trash-window').style.display = 'none';
-                    });
+
+                    // Trash Window Controls
+                    const trashWindow = document.getElementById('trash-window');
+                    const trashMinimize = document.getElementById('trash-minimize');
+                    const trashMaximize = document.getElementById('trash-maximize');
+                    const trashClose = document.getElementById('trash-close');
+
+                    let isTrashMaximized = false;
+                    let trashLastWidth = "800px";
+                    let trashLastHeight = "500px";
+                    let trashLastTop = "60px";
+                    let trashLastLeft = "120px";
+
+                    if (trashMinimize) {
+                        trashMinimize.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            trashWindow.style.display = 'none';
+                            trashWindow.classList.remove('active');
+                        });
+                    }
+
+                    if (trashMaximize) {
+                        trashMaximize.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            isTrashMaximized = !isTrashMaximized;
+                            if (isTrashMaximized) {
+                                trashLastTop = trashWindow.style.top;
+                                trashLastLeft = trashWindow.style.left;
+                                trashLastWidth = trashWindow.style.width;
+                                trashLastHeight = trashWindow.style.height;
+                                trashWindow.classList.add('maximized');
+                                trashMaximize.querySelector('i').classList.replace('fa-square', 'fa-clone');
+                            } else {
+                                trashWindow.classList.remove('maximized');
+                                trashMaximize.querySelector('i').classList.replace('fa-clone', 'fa-square');
+                            }
+                        });
+                    }
+
+                    if (trashClose) {
+                        trashClose.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            trashWindow.style.display = 'none';
+                            trashWindow.classList.remove('active');
+                        });
+                    }
+
+                    // Make trash window draggable
+                    if (trashWindow && typeof makeWindowDraggable === 'function') {
+                        makeWindowDraggable(trashWindow);
+                    }
 
                     function makeTrashDraggable(element) {
                         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -7524,6 +7659,7 @@ window.addEventListener('load', function () {
                                 document.onmouseup = null;
                                 document.onmousemove = null;
                                 element.classList.remove('dragging');
+                                element.style.zIndex = "10"; // Reset to default icon z-index
                             };
                             document.onmousemove = (e) => {
                                 pos1 = pos3 - e.clientX;
@@ -8347,6 +8483,13 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const newBtnCancel = btnCancel.cloneNode(true);
                         btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
                         
+                        // Handle close button
+                        const btnClose = document.getElementById('btnCloseValidation');
+                        if (btnClose) {
+                            const newBtnClose = btnClose.cloneNode(true);
+                            btnClose.parentNode.replaceChild(newBtnClose, btnClose);
+                        }
+                        
                         // Remove old input event listeners by cloning
                         const newInput = input.cloneNode(true);
                         input.parentNode.replaceChild(newInput, input);
@@ -8553,6 +8696,12 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         // Add event listeners
                         newBtnSubmit.addEventListener('click', handleSubmit);
                         newBtnCancel.addEventListener('click', handleCancel);
+                        
+                        // Add close button event listener
+                        const finalBtnClose = document.getElementById('btnCloseValidation');
+                        if (finalBtnClose) {
+                            finalBtnClose.addEventListener('click', handleCancel);
+                        }
                         
                         // Enter key to submit
                         sentenceInput.addEventListener('keydown', (e) => {

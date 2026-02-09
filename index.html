@@ -8476,13 +8476,6 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             const normalizedSentence = normalizeString(sentence);
                             const similarity = calculateSimilarity(normalizedInput, normalizedSentence);
                             
-                            // Debug logging
-                            console.log('Original sentence:', sentence);
-                            console.log('User input:', userInput);
-                            console.log('Normalized input:', normalizedInput);
-                            console.log('Normalized sentence:', normalizedSentence);
-                            console.log('Similarity:', similarity + '%');
-                            
                             // Pass if similarity >= 80%
                             if (similarity >= 80) {
                                 // Correct! Show success animation

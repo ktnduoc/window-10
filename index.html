@@ -4148,6 +4148,329 @@
                 transform: scale(1);
             }
         }
+
+        /* Translation Selection Styles */
+        .translation-selection-body {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .translation-instruction {
+            font-size: 14px;
+            color: #000;
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .translation-english-display {
+            background: #fff;
+            border: 2px solid #0078d7;
+            border-left: 4px solid #0078d7;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0078d7;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .translation-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .translation-option {
+            background: white;
+            border: 1px solid #d0d0d0;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .translation-option:hover {
+            background: #e8f4ff;
+            border-color: #0078d7;
+            transform: translateX(3px);
+        }
+
+        .translation-option:active {
+            background: #d0e8ff;
+        }
+
+        .translation-option.correct {
+            background: #dff6dd;
+            border-color: #107c10;
+            animation: correctPulse 0.5s;
+        }
+
+        .translation-option.wrong {
+            background: #fef0f0;
+            border-color: #d13438;
+            animation: wrongShake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .translation-error {
+            color: #d13438;
+            font-size: 11px;
+            margin-top: 10px;
+            display: none;
+            background: #fef0f0;
+            padding: 8px;
+            border-left: 3px solid #d13438;
+            text-align: center;
+        }
+
+        /* Congratulations Modal - Windows 10 Style */
+        .congratulations-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s;
+        }
+
+        .congratulations-content {
+            background: white;
+            border-radius: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 0;
+            width: 500px;
+            color: #000;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #0078d7;
+            border-top: 2px solid #0078d7;
+            animation: slideInSmooth 0.3s ease-out;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .congratulations-header {
+            background: white;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .congratulations-header-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 400;
+        }
+
+        .congratulations-header-text::before {
+            content: "🏆";
+            font-size: 16px;
+        }
+
+        .congratulations-close {
+            width: 46px;
+            height: 32px;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #000;
+            transition: background 0.15s, color 0.15s;
+            padding: 0;
+            margin: 0;
+        }
+
+        .congratulations-close:hover {
+            background: #e81123;
+            color: white;
+        }
+
+        .congratulations-close:active {
+            background: #c50d1d;
+            color: white;
+        }
+
+        .congratulations-body {
+            padding: 30px 40px 25px 40px;
+            text-align: center;
+        }
+
+        .congratulations-icon {
+            font-size: 72px;
+            margin-bottom: 15px;
+            animation: celebrateSubtle 0.6s ease-out;
+        }
+
+        .congratulations-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #0078d7;
+            letter-spacing: 0.5px;
+        }
+
+        .congratulations-message {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .congratulations-stats {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 0;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #0078d7;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .congratulations-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding-bottom: 5px;
+        }
+
+        .btn-congrats {
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 400;
+            border: 1px solid #ababab;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            text-transform: none;
+            letter-spacing: 0;
+            font-family: 'Segoe UI', sans-serif;
+            min-width: 100px;
+        }
+
+        .btn-restart {
+            background: white;
+            color: #000;
+        }
+
+        .btn-restart:hover {
+            background: #e5f3ff;
+            border-color: #0078d7;
+        }
+
+        .btn-restart:active {
+            background: #cce8ff;
+        }
+
+        .btn-continue {
+            background: #0078d7;
+            color: white;
+            border: 1px solid #0078d7;
+        }
+
+        .btn-continue:hover {
+            background: #005a9e;
+            border-color: #005a9e;
+        }
+
+        .btn-continue:active {
+            background: #004275;
+        }
+
+        /* Confetti Animation - Windows 10 Style (subtle) */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #0078d7;
+            opacity: 0.6;
+            animation: confettiFallSubtle 4s linear infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInSmooth {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes celebrateSubtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes confettiFallSubtle {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(100vh) rotate(180deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
@@ -4175,6 +4498,47 @@
                 <div class="buttons">
                     <button class="btn-submit" id="btnSubmitValidation">OK</button>
                     <button class="btn-cancel" id="btnCancelValidation">Cancel</button>
+                </div>
+            </div>
+            <!-- Translation Selection Section (Hidden initially) -->
+            <div class="translation-selection-body" id="translationSelectionBody" style="display: none;">
+                <div class="translation-instruction">
+                    🎯 Select the correct Vietnamese translation for:
+                </div>
+                <div class="translation-english-display" id="translationEnglishDisplay">
+                    <!-- English sentence will be shown here -->
+                </div>
+                <div class="translation-options" id="translationOptions">
+                    <!-- Options will be added dynamically -->
+                </div>
+                <div class="translation-error" id="translationError">❌ Wrong translation! Try again.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Congratulations Modal - Windows 10 Style -->
+    <div class="congratulations-modal" id="congratulationsModal">
+        <div class="congratulations-content">
+            <div class="congratulations-header">
+                <div class="congratulations-header-text">Congratulations</div>
+                <button class="congratulations-close" id="btnCloseCongrats" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="congratulations-body">
+                <div class="congratulations-icon">🎉</div>
+                <div class="congratulations-title">Great Job!</div>
+                <div class="congratulations-message">
+                    You've closed all current sticky notes!<br>
+                    Keep up the excellent work learning English.
+                </div>
+                <div class="congratulations-stats">
+                    <div class="stat-item" id="totalSentences">0 / 165</div>
+                    <div class="stat-label">Learning Progress</div>
+                </div>
+                <div class="congratulations-buttons">
+                    <button class="btn-congrats btn-restart" id="btnRestart">Start Over</button>
+                    <button class="btn-congrats btn-continue" id="btnContinue">Continue</button>
                 </div>
             </div>
         </div>
@@ -7977,205 +8341,204 @@ window.addEventListener('load', function () {
                     zIndexCounter: 1000,
                     positionOffset: 30,
                     
+                    // Track completed sentences (saved to localStorage)
+                    getCompletedSentences() {
+                        try {
+                            const data = localStorage.getItem('english_learning_progress');
+                            return data ? JSON.parse(data) : [];
+                        } catch(e) {
+                            return [];
+                        }
+                    },
+                    
+                    saveCompletedSentence(sentenceEn) {
+                        try {
+                            const completed = this.getCompletedSentences();
+                            if (!completed.includes(sentenceEn)) {
+                                completed.push(sentenceEn);
+                                localStorage.setItem('english_learning_progress', JSON.stringify(completed));
+                                console.log('✅ Saved progress:', sentenceEn);
+                                console.log('📊 Total completed:', completed.length, '/', this.englishSentences.length);
+                            }
+                        } catch(e) {
+                            console.error('Failed to save progress:', e);
+                        }
+                    },
+                    
+                    getRemainingSentences() {
+                        const completed = this.getCompletedSentences();
+                        return this.englishSentences.filter(s => !completed.includes(s.en));
+                    },
+                    
                     // English sentences for learning
                   englishSentences: [
-  "A bad workman always blames his tools.",
-  "A bird in the hand is worth two in the bush.",
-  "A friend in need is a friend indeed.",
-  "A penny saved is a penny earned.",
-  "A rolling stone gathers no moss.",
-  "A watched pot never boils.",
-  "All good things must come to an end.",
-  "All that glitters is not gold.",
-  "Barking dogs seldom bite.",
-  "Beauty is only skin deep.",
-  "Beggars can't be choosers.",
-  "Better the devil you know than the devil you don't.",
-  "Birds of a feather flock together.",
-  "Don't bite off more than you can chew.",
-  "Don't bite the hand that feeds you.",
-  "Don't put all your eggs in one basket.",
-  "Easy does it.",
-  "Every man for himself.",
-  "Familiarity breeds contempt.",
-  "First come, first served.",
-  "Fools rush in where angels fear to tread.",
-  "Give someone an inch and they'll take a mile.",
-  "Good fences make good neighbors.",
-  "He who laughs last laughs best.",
-  "Hindsight is 20/20.",
-  "If the shoe fits, wear it.",
-  "It takes one to know one.",
-  "Kill two birds with one stone.",
-  "Let sleeping dogs lie.",
-  "Like father, like son.",
-  "Look before you leap.",
-  "Love is blind.",
-  "Make hay while the sun shines.",
-  "Many hands make light work.",
-  "Necessity is the mother of invention.",
-  "No man is an island.",
-  "One swallow does not make a summer.",
-  "Out of the frying pan into the fire.",
-  "People in glass houses shouldn't throw stones.",
-  "Practice what you preach.",
-  "Put your best foot forward.",
-  "Rome wasn't built in a day.",
-  "Seeing is believing.",
-  "Spare the rod, spoil the child.",
-  "Speak softly and carry a big stick.",
-  "The apple doesn't fall far from the tree.",
-  "The best defense is a good offense.",
-  "The early bird gets the worm.",
-  "The squeaky wheel gets the grease.",
-  "There's no such thing as a free lunch.",
-  "There's no time like the present.",
-  "Third time's the charm.",
-  "Too many cooks spoil the broth.",
-  "Two wrongs don't make a right.",
-  "When the cat's away, the mice will play.",
-  "Where there's smoke, there's fire.",
-  "You can catch more flies with honey than with vinegar.",
-  "You can't make an omelette without breaking eggs.",
-  "A chain is only as strong as its weakest link.",
-  "A fool and his money are soon parted.",
-  "A leopard can't change its spots.",
-  "A little knowledge is a dangerous thing.",
-  "A problem shared is a problem halved.",
-  "Absence makes the heart grow fonder.",
-  "Actions speak louder than words.",
-  "All's fair in love and war.",
-  "An ounce of prevention is worth a pound of cure.",
-  "Bite the bullet.",
-  "Burn the midnight oil.",
-  "Cross that bridge when you come to it.",
-  "Don't count your chickens before they hatch.",
-  "Don't cry over spilled milk.",
-  "Don't put off until tomorrow what you can do today.",
-  "Every cloud has a silver lining.",
-  "Fortune favors the brave.",
-  "Great minds think alike.",
-  "Hit the nail on the head.",
-  "If you can't stand the heat, get out of the kitchen.",
-  "It takes two to tango.",
-  "Jump on the bandwagon.",
-  "Keep your chin up.",
-  "Laughter is the best medicine.",
-  "Live and learn.",
-  "Money talks.",
-  "Once in a blue moon.",
-  "One step at a time.",
-  "Out of sight, out of mind.",
-  "Put all your eggs in one basket.",
-  "Rain cats and dogs.",
-  "Rules are made to be broken.",
-  "The ball is in your court.",
-  "The pot calling the kettle black.",
-  "There's method in my madness.",
-  "Time flies when you're having fun.",
-  "Turn over a new leaf.",
-  "Under the weather.",
-  "When pigs fly.",
-  "You can't judge a book by its cover.",
-  "Practice makes perfect.",
-  "Knowledge is power.",
-  "Time is money.",
-  "Actions speak louder than words.",
-  "Where there's a will, there's a way.",
-  "Better late than never.",
-  "The early bird catches the worm.",
-  "Don't judge a book by its cover.",
-  "Two heads are better than one.",
-  "When in Rome, do as the Romans do.",
-  "All's well that ends well.",
-  "Every cloud has a silver lining.",
-  "Rome wasn't built in a day.",
-  "An apple a day keeps the doctor away.",
-  "Honesty is the best policy.",
-  "The pen is mightier than the sword.",
-  "A picture is worth a thousand words.",
-  "Absence makes the heart grow fonder.",
-  "You can't have your cake and eat it too.",
-  "Easy come, easy go.",
-  "Fortune favors the bold.",
-  "The grass is always greener on the other side.",
-  "Hope for the best, prepare for the worst.",
-  "If it ain't broke, don't fix it.",
-  "Keep your friends close and your enemies closer.",
-  "Let bygones be bygones.",
-  "No pain, no gain.",
-  "Once bitten, twice shy.",
-  "The best things in life are free.",
-  "You reap what you sow.",
-  "Curiosity killed the cat.",
-  "Don't count your chickens before they hatch.",
-  "A stitch in time saves nine.",
-  "Too many cooks spoil the broth.",
-  "Beauty is in the eye of the beholder.",
-  "Better safe than sorry.",
-  "Birds of a feather flock together.",
-  "Don't bite the hand that feeds you.",
-  "When the going gets tough, the tough get going.",
-  "A journey of a thousand miles begins with a single step.",
-  "All that glitters is not gold.",
-  "Beggars can't be choosers.",
-  "Blood is thicker than water.",
-  "Don't put all your eggs in one basket.",
-  "Every dog has its day.",
-  "Familiarity breeds contempt.",
-  "Good things come to those who wait.",
-  "Haste makes waste.",
-  "If you can't beat them, join them.",
-  "It's better to give than to receive.",
-  "Laughter is the best medicine.",
-  "Look before you leap.",
-  "Money doesn't grow on trees.",
-  "Necessity is the mother of invention.",
-  "One man's trash is another man's treasure.",
-  "Out of sight, out of mind.",
-  "Prevention is better than cure.",
-  "Slow and steady wins the race.",
-  "The proof of the pudding is in the eating.",
-  "There is no smoke without fire.",
-  "Too good to be true.",
-  "Variety is the spice of life.",
-  "What goes around comes around.",
-  "When it rains, it pours.",
-  "You can lead a horse to water, but you can't make it drink.",
-  "A watched pot never boils.",
-  "Barking dogs seldom bite.",
-  "Better to have loved and lost than never to have loved at all.",
-  "Cleanliness is next to godliness.",
-  "Don't cross your bridges before you come to them.",
-  "Don't put off until tomorrow what you can do today.",
-  "Fools rush in where angels fear to tread.",
-  "Great minds think alike.",
-  "He who hesitates is lost.",
-  "History repeats itself.",
-  "If the shoe fits, wear it.",
-  "Ignorance is bliss.",
-  "It takes two to tango.",
-  "Jack of all trades, master of none.",
-  "Live and let live.",
-  "Make hay while the sun shines.",
-  "Many hands make light work.",
-  "Misery loves company.",
-  "Nothing ventured, nothing gained.",
-  "One good turn deserves another.",
-  "Patience is a virtue.",
-  "People who live in glass houses shouldn't throw stones.",
-  "Put your money where your mouth is.",
-  "Seeing is believing.",
-  "Strike while the iron is hot.",
-  "The customer is always right.",
-  "The devil is in the details.",
-  "There's no place like home.",
-  "Time heals all wounds.",
-  "To err is human, to forgive divine.",
-  "Tomorrow is another day.",
-  "Two wrongs don't make a right.",
-  "When life gives you lemons, make lemonade.",
-  "You can't teach an old dog new tricks."
+  { en: "A bad workman always blames his tools.", vi: "Thợ xấu thì khoe búa" },
+  { en: "A bird in the hand is worth two in the bush.", vi: "Một con chim trong tay còn hơn hai con trên cây" },
+  { en: "A friend in need is a friend indeed.", vi: "Bạn thật sự là người giúp đỡ khi khó khăn" },
+  { en: "A penny saved is a penny earned.", vi: "Tiết kiệm một xu bằng kiếm được một xu" },
+  { en: "A rolling stone gathers no moss.", vi: "Đá lăn không đọng rêu" },
+  { en: "A watched pot never boils.", vi: "Nồi canh ngó mãi chẳng sôi" },
+  { en: "All good things must come to an end.", vi: "Tất cả mọi điều tốt đẹp đều có lúc kết thúc" },
+  { en: "All that glitters is not gold.", vi: "Không phải tất cả vàng là đều sáng" },
+  { en: "Barking dogs seldom bite.", vi: "Chó sủa hiếm khi cắn" },
+  { en: "Beauty is only skin deep.", vi: "Vẻ đẹp chỉ ở bề ngoài" },
+  { en: "Beggars can't be choosers.", vi: "Người xin không được chọn" },
+  { en: "Better the devil you know than the devil you don't.", vi: "Thà là ma quen còn hơn ma lạ" },
+  { en: "Birds of a feather flock together.", vi: "Ngưu tầm ngưu, mã tầm mã" },
+  { en: "Don't bite off more than you can chew.", vi: "Đừng cắn nhiều hơn bạn có thể nhai" },
+  { en: "Don't bite the hand that feeds you.", vi: "Đừng cắn tay người cho ăn" },
+  { en: "Don't put all your eggs in one basket.", vi: "Đừng bỏ tất cả trứng vào một giỏ" },
+  { en: "Easy does it.", vi: "Từ từ mới chắc" },
+  { en: "Every man for himself.", vi: "Mỗi người lo cho mình" },
+  { en: "Familiarity breeds contempt.", vi: "Gần nhau thành khinh nhau" },
+  { en: "First come, first served.", vi: "Ai đến trước được phục vụ trước" },
+  { en: "Fools rush in where angels fear to tread.", vi: "Kẻ khờ dại lao vào nơi thiên thần còn sợ" },
+  { en: "Give someone an inch and they'll take a mile.", vi: "Cho lên ngồi lại đòi lên nằm" },
+  { en: "Good fences make good neighbors.", vi: "Hàng rào tốt làm nên hàng xóm tốt" },
+  { en: "He who laughs last laughs best.", vi: "Ai cười sau cười lâu" },
+  { en: "Hindsight is 20/20.", vi: "Nhìn lại thì thấy rõ" },
+  { en: "If the shoe fits, wear it.", vi: "Nếu giày vừa thì mang" },
+  { en: "It takes one to know one.", vi: "Phải là người có kinh nghiệm mới hiểu" },
+  { en: "Kill two birds with one stone.", vi: "Một mũi tên trúng hai đích" },
+  { en: "Let sleeping dogs lie.", vi: "Đừng đánh thức chó đang ngủ" },
+  { en: "Like father, like son.", vi: "Cha nào con nấy" },
+  { en: "Look before you leap.", vi: "Nhìn trước khi nhảy" },
+  { en: "Love is blind.", vi: "Tình yêu mù quáng" },
+  { en: "Make hay while the sun shines.", vi: "Hãy làm việc khi còn điều kiện" },
+  { en: "Many hands make light work.", vi: "Nhiều tay làm việc nhẹ" },
+  { en: "Necessity is the mother of invention.", vi: "Cần thiết là mẹ của phát minh" },
+  { en: "No man is an island.", vi: "Không ai là một hòn đảo" },
+  { en: "One swallow does not make a summer.", vi: "Một con én không làm nên mùa xuân" },
+  { en: "Out of the frying pan into the fire.", vi: "Tránh vỏ dưa gặp vỏ dừa" },
+  { en: "People in glass houses shouldn't throw stones.", vi: "Sống trong nhà kính đừng ném đá" },
+  { en: "Practice what you preach.", vi: "Hãy làm những gì bạn nói" },
+  { en: "Put your best foot forward.", vi: "Cố gắng làm tốt nhất" },
+  { en: "Rome wasn't built in a day.", vi: "Rome không phải xây trong một ngày" },
+  { en: "Seeing is believing.", vi: "Mắt thấy mới tin" },
+  { en: "Spare the rod, spoil the child.", vi: "Thương cho roi cho vọt" },
+  { en: "Speak softly and carry a big stick.", vi: "Nói nhỏ và mang gậy lớn" },
+  { en: "The apple doesn't fall far from the tree.", vi: "Con nhà tông không giống lông cũng giống cánh" },
+  { en: "The best defense is a good offense.", vi: "Phòng ngự tốt nhất là tấn công" },
+  { en: "The early bird gets the worm.", vi: "Chim đến sớm bắt sâu" },
+  { en: "The squeaky wheel gets the grease.", vi: "Bánh xe kêu mới được tra dầu" },
+  { en: "There's no such thing as a free lunch.", vi: "Không có bữa trưa miễn phí" },
+  { en: "There's no time like the present.", vi: "Không khi nào bằng hiện tại" },
+  { en: "Third time's the charm.", vi: "Lần thứ ba là lần may mắn" },
+  { en: "Too many cooks spoil the broth.", vi: "Nhiều thầy bỏ bùa" },
+  { en: "Two wrongs don't make a right.", vi: "Hai điều sai không làm nên điều đúng" },
+  { en: "When the cat's away, the mice will play.", vi: "Vắng chủ nhà gà vọc niêu tôm" },
+  { en: "Where there's smoke, there's fire.", vi: "Có khói là có lửa" },
+  { en: "You can catch more flies with honey than with vinegar.", vi: "Mật ngọt hơn giấm" },
+  { en: "You can't make an omelette without breaking eggs.", vi: "Muốn ăn trứng phải phá vỏ" },
+  { en: "A chain is only as strong as its weakest link.", vi: "Chuỗi chỉ mạnh bằng mắt xích yếu nhất" },
+  { en: "A fool and his money are soon parted.", vi: "Kẻ ngốc và tiền nhanh chóng xa nhau" },
+  { en: "A leopard can't change its spots.", vi: "Báo không thể đổi vằn" },
+  { en: "A little knowledge is a dangerous thing.", vi: "Biết mà biết ít là nguy hiểm" },
+  { en: "A problem shared is a problem halved.", vi: "Chia sẻ vấn đề là giảm đi một nửa" },
+  { en: "Absence makes the heart grow fonder.", vi: "Xa mặt cách lòng" },
+  { en: "Actions speak louder than words.", vi: "Hành động nói lên hơn lời nói" },
+  { en: "All's fair in love and war.", vi: "Trong tình yêu và chiến tranh tất cả đều công bằng" },
+  { en: "An ounce of prevention is worth a pound of cure.", vi: "Phòng bệnh hơn chữa bệnh" },
+  { en: "Bite the bullet.", vi: "Chấp nhận khó khăn" },
+  { en: "Burn the midnight oil.", vi: "Thức khuya làm việc" },
+  { en: "Cross that bridge when you come to it.", vi: "Đến cầu thì lại bắc cầu" },
+  { en: "Don't count your chickens before they hatch.", vi: "Đừng đếm gà trước khi nở" },
+  { en: "Don't cry over spilled milk.", vi: "Đừng khóc vì sữa đổ" },
+  { en: "Don't put off until tomorrow what you can do today.", vi: "Đừng để ngày mai những gì có thể làm hôm nay" },
+  { en: "Every cloud has a silver lining.", vi: "Đằng sau đám mây đen là tia nắng vàng" },
+  { en: "Fortune favors the brave.", vi: "May mắn đến với người dũng cảm" },
+  { en: "Great minds think alike.", vi: "Anh hùng sở kiến lược đồng" },
+  { en: "Hit the nail on the head.", vi: "Đánh đúng trọng tâm" },
+  { en: "If you can't stand the heat, get out of the kitchen.", vi: "Không chịu được thì đừng làm" },
+  { en: "It takes two to tango.", vi: "Cần hai người để nhảy tango" },
+  { en: "Jump on the bandwagon.", vi: "Nhảy vào chiếc xe chiến thắng" },
+  { en: "Keep your chin up.", vi: "Giữ tinh thần lạc quan" },
+  { en: "Laughter is the best medicine.", vi: "Cười là liều thuốc tốt nhất" },
+  { en: "Live and learn.", vi: "Sống và học hỏi" },
+  { en: "Money talks.", vi: "Tiền nói lên tất cả" },
+  { en: "Once in a blue moon.", vi: "Hiếm khi" },
+  { en: "One step at a time.", vi: "Từng bước một" },
+  { en: "Out of sight, out of mind.", vi: "Xa mặt cách lòng" },
+  { en: "Put all your eggs in one basket.", vi: "Bỏ tất cả trứng vào một giỏ" },
+  { en: "Rain cats and dogs.", vi: "Mưa tầm tã" },
+  { en: "Rules are made to be broken.", vi: "Luật được tạo ra để phá vỡ" },
+  { en: "The ball is in your court.", vi: "Quyết định là của bạn" },
+  { en: "The pot calling the kettle black.", vi: "Thằng chó chê thằng mèo lắm lông" },
+  { en: "There's method in my madness.", vi: "Có lý trí trong sự điên rồ của tôi" },
+  { en: "Time flies when you're having fun.", vi: "Thời gian trôi nhanh khi vui vẻ" },
+  { en: "Turn over a new leaf.", vi: "Bắt đầu trang mới" },
+  { en: "Under the weather.", vi: "Không được khỏe" },
+  { en: "When pigs fly.", vi: "Khi nào lợn biết bay" },
+  { en: "You can't judge a book by its cover.", vi: "Đừng đánh giá sách qua bìa" },
+  { en: "Practice makes perfect.", vi: "Luyện tập tạo nên hoàn hảo" },
+  { en: "Knowledge is power.", vi: "Tri thức là sức mạnh" },
+  { en: "Time is money.", vi: "Thời gian là tiền bạc" },
+  { en: "Where there's a will, there's a way.", vi: "Có chí thì nên" },
+  { en: "Better late than never.", vi: "Muộn còn hơn không" },
+  { en: "The early bird catches the worm.", vi: "Ai ngủ dậy sớm sẽ thành công" },
+  { en: "Two heads are better than one.", vi: "Hai người suy nghĩ hơn một" },
+  { en: "When in Rome, do as the Romans do.", vi: "Nhập gia tùy tục" },
+  { en: "All's well that ends well.", vi: "Kết thúc tốt đẹp là tốt" },
+  { en: "An apple a day keeps the doctor away.", vi: "Một quả táo mỗi ngày tránh xa bác sĩ" },
+  { en: "Honesty is the best policy.", vi: "Trung thực là chính sách tốt nhất" },
+  { en: "The pen is mightier than the sword.", vi: "Ngòi bút mạnh hơn gươm" },
+  { en: "A picture is worth a thousand words.", vi: "Một hình ảnh giá ngàn lời" },
+  { en: "You can't have your cake and eat it too.", vi: "Không thể vừa giữ vừa ăn bánh" },
+  { en: "Easy come, easy go.", vi: "Dễ đến dễ mất" },
+  { en: "Fortune favors the bold.", vi: "Vận may thuộc về người dũng cảm" },
+  { en: "The grass is always greener on the other side.", vi: "Bên kia bờ rào cỏ luôn xanh hơn" },
+  { en: "Hope for the best, prepare for the worst.", vi: "Hy vọng điều tốt nhất, chuẩn bị cho điều tồi tệ nhất" },
+  { en: "If it ain't broke, don't fix it.", vi: "Nếu không hỏng thì đừng sửa" },
+  { en: "Keep your friends close and your enemies closer.", vi: "Giữ bạn bè gần và kẻ thù gần hơn" },
+  { en: "Let bygones be bygones.", vi: "Việc đã qua hãy để qua" },
+  { en: "No pain, no gain.", vi: "Không đau đớn không có thành công" },
+  { en: "Once bitten, twice shy.", vi: "Một lần bị cắn hai lần nhút nhát" },
+  { en: "The best things in life are free.", vi: "Những điều tốt nhất trong cuộc sống là miễn phí" },
+  { en: "You reap what you sow.", vi: "Gieo gì gặt nấy" },
+  { en: "Curiosity killed the cat.", vi: "Tính tò mò giết chết mèo" },
+  { en: "A stitch in time saves nine.", vi: "Một mũi khâu đúng lúc tiết kiệm chín mũi" },
+  { en: "Beauty is in the eye of the beholder.", vi: "Cái đẹp tuỳ thuộc vào người xem" },
+  { en: "Better safe than sorry.", vi: "An toàn hơn hối tiếc" },
+  { en: "Blood is thicker than water.", vi: "Một giọt máu đào hơn ao nước lã" },
+  { en: "Every dog has its day.", vi: "Mỗi người đều có ngày vinh quang" },
+  { en: "Good things come to those who wait.", vi: "Điều tốt đến với người biết đợi chờ" },
+  { en: "Haste makes waste.", vi: "Vội vàng làm hỏng việc" },
+  { en: "If you can't beat them, join them.", vi: "Không thắng được thì hãy tham gia" },
+  { en: "It's better to give than to receive.", vi: "Cho đi tốt hơn nhận lấy" },
+  { en: "Money doesn't grow on trees.", vi: "Tiền không mọc trên cây" },
+  { en: "One man's trash is another man's treasure.", vi: "Rác của người này là kho báu của người kia" },
+  { en: "Prevention is better than cure.", vi: "Phòng bệnh hơn chữa bệnh" },
+  { en: "Slow and steady wins the race.", vi: "Chậm và chắc sẽ thắng cuộc đua" },
+  { en: "The proof of the pudding is in the eating.", vi: "Ăn thử mới biết bánh ngon" },
+  { en: "There is no smoke without fire.", vi: "Có khói là có lửa" },
+  { en: "Too good to be true.", vi: "Tốt quá không thật" },
+  { en: "Variety is the spice of life.", vi: "Đa dạng là gia vị của cuộc sống" },
+  { en: "What goes around comes around.", vi: "Quả báo ứng nghiệm" },
+  { en: "When it rains, it pours.", vi: "Họa vô đơn chí" },
+  { en: "You can lead a horse to water, but you can't make it drink.", vi: "Dắt ngựa đến suối nhưng không thể ép uống" },
+  { en: "Better to have loved and lost than never to have loved at all.", vi: "Yêu rồi mất còn hơn chưa từng yêu" },
+  { en: "Cleanliness is next to godliness.", vi: "Sạch sẽ gần với đạo đức" },
+  { en: "Don't cross your bridges before you come to them.", vi: "Đừng lo trước khi có việc" },
+  { en: "He who hesitates is lost.", vi: "Ai do dự sẽ thua cuộc" },
+  { en: "History repeats itself.", vi: "Lịch sử lặp lại" },
+  { en: "Ignorance is bliss.", vi: "Không biết mà vui" },
+  { en: "Jack of all trades, master of none.", vi: "Biết nhiều nhưng không tinh" },
+  { en: "Live and let live.", vi: "Sống và để người khác sống" },
+  { en: "Misery loves company.", vi: "Khổ đau thích có bạn" },
+  { en: "Nothing ventured, nothing gained.", vi: "Không dám liều không có lời" },
+  { en: "One good turn deserves another.", vi: "Ơn đền ơn" },
+  { en: "Patience is a virtue.", vi: "Kiên nhẫn là một đức hạnh" },
+  { en: "People who live in glass houses shouldn't throw stones.", vi: "Người sống trong nhà kính không nên ném đá" },
+  { en: "Put your money where your mouth is.", vi: "Hãy chứng minh lời nói của bạn" },
+  { en: "Strike while the iron is hot.", vi: "Đánh khi sắt còn nóng" },
+  { en: "The customer is always right.", vi: "Khách hàng luôn đúng" },
+  { en: "The devil is in the details.", vi: "Ma quỷ ở trong chi tiết" },
+  { en: "There's no place like home.", vi: "Không có nơi nào như nhà" },
+  { en: "Time heals all wounds.", vi: "Thời gian chữa lành mọi vết thương" },
+  { en: "To err is human, to forgive divine.", vi: "Sai lầm là của người, tha thứ là của Chúa" },
+  { en: "Tomorrow is another day.", vi: "Ngày mai là một ngày mới" },
+  { en: "When life gives you lemons, make lemonade.", vi: "Khi cuộc sống cho bạn chanh, hãy làm nước chanh" },
+  { en: "You can't teach an old dog new tricks.", vi: "Khó dạy người già điều mới" }
 ],
                     
                     // Play sound when creating sticky note
@@ -8188,8 +8551,70 @@ window.addEventListener('load', function () {
                             console.log('Audio error:', e);
                         }
                     },
+
+                    // Show congratulations modal with confetti
+                    showCongratulationsModal() {
+                        const modal = document.getElementById('congratulationsModal');
+                        const totalSentencesEl = document.getElementById('totalSentences');
+                        const btnRestart = document.getElementById('btnRestart');
+                        const btnContinue = document.getElementById('btnContinue');
+                        const btnClose = document.getElementById('btnCloseCongrats');
+
+                        // Update stats - show number of completed sentences (successfully closed sticky notes)
+                        const completedCount = this.getCompletedSentences().length;
+                        totalSentencesEl.textContent = completedCount + ' / ' + this.englishSentences.length;
+
+                        // Show modal
+                        modal.style.display = 'flex';
+
+                        // Create confetti
+                        this.createConfetti(modal);
+
+                        // Close button in header
+                        if (btnClose) {
+                            btnClose.onclick = () => {
+                                modal.style.display = 'none';
+                            };
+                        }
+
+                        // Restart button - clear progress and reload
+                        btnRestart.onclick = () => {
+                            localStorage.removeItem('english_learning_progress');
+                            modal.style.display = 'none';
+                            alert('✨ Progress reset! Starting fresh with all sentences.');
+                            location.reload();
+                        };
+
+                        // Continue button - just close and continue learning
+                        btnContinue.onclick = () => {
+                            modal.style.display = 'none';
+                        };
+                    },
+
+                    // Create confetti effect - Windows 10 style
+                    createConfetti(container) {
+                        const colors = ['#0078d7', '#005a9e', '#00bcf2', '#767676', '#a0a0a0'];
+                        const confettiCount = 30;
+
+                        for (let i = 0; i < confettiCount; i++) {
+                            const confetti = document.createElement('div');
+                            confetti.className = 'confetti';
+                            confetti.style.left = Math.random() * 100 + '%';
+                            confetti.style.top = -10 + 'px';
+                            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                            confetti.style.animationDelay = Math.random() * 2 + 's';
+                            confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                            container.querySelector('.congratulations-content').appendChild(confetti);
+                        }
+
+                        // Remove confetti after animation
+                        setTimeout(() => {
+                            const confettiElements = container.querySelectorAll('.confetti');
+                            confettiElements.forEach(el => el.remove());
+                        }, 6000);
+                    },
                     
-                    createWindow(appType, color) {
+                    createWindow(appType, color, withEnglishSentence = true) {
                         const instanceId = `${appType}-${Date.now()}`;
                         const offset = this.instances[appType].length * this.positionOffset;
                         
@@ -8203,7 +8628,7 @@ window.addEventListener('load', function () {
                                 windowHTML = this.createNotepadWindow(instanceId, offset);
                                 break;
                             case 'sticky':
-                                windowHTML = this.createStickyWindow(instanceId, offset, color || '#fff7d1');
+                                windowHTML = this.createStickyWindow(instanceId, offset, color || '#fff7d1', withEnglishSentence);
                                 break;
                             case 'cmd':
                                 windowHTML = this.createCMDWindow(instanceId, offset);
@@ -8322,18 +8747,31 @@ window.addEventListener('load', function () {
                         </div>`;
                     },
                     
-                    createStickyWindow(id, offset, color) {
+                    createStickyWindow(id, offset, color, withEnglishSentence = true) {
                         // Default color if not provided
                         if (!color) {
                             color = '#fff7d1';
                         }
                         
-                        // Pick a random English sentence
-                        const randomSentence = this.englishSentences[Math.floor(Math.random() * this.englishSentences.length)];
+                        let randomSentence = '';
+                        let randomSentenceObj = null;
+                        let sentenceAttrs = '';
+                        
+                        // Only add English sentence if requested (for Stacks layer or Space key)
+                        if (withEnglishSentence) {
+                            // Pick a random English sentence from remaining (not completed)
+                            const remainingSentences = this.getRemainingSentences();
+                            
+                            // Use remaining sentences, or all sentences if all completed
+                            const sentencesToUse = remainingSentences.length > 0 ? remainingSentences : this.englishSentences;
+                            randomSentenceObj = sentencesToUse[Math.floor(Math.random() * sentencesToUse.length)];
+                            randomSentence = randomSentenceObj.en;
+                            sentenceAttrs = `data-english-sentence="${randomSentence}" data-vietnamese-translation="${randomSentenceObj.vi}"`;
+                        }
                         
                         const headerColor = this.getStickyHeaderColor(color);
                         return `
-                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};" data-sticky-color="${color}" data-english-sentence="${randomSentence}">
+                        <div class="window sticky-note" id="${id}" style="left: ${200 + offset}px; top: ${120 + offset}px; opacity: 0; transition: opacity 0.2s; background-color: ${color};" data-sticky-color="${color}" ${sentenceAttrs}>
                             <div class="window-header" style="background-color: ${headerColor};">
                                 <div class="window-title">
                                     <i class="fas fa-plus" data-action="add-note" style="margin-right: 15px; cursor: pointer;" title="New note"></i>
@@ -8353,7 +8791,7 @@ window.addEventListener('load', function () {
                             </div>
                             <div class="window-body">
                                 <div class="vscode-editor" style="background-color: ${color}; overflow: hidden;">
-                                    <textarea spellcheck="false" placeholder="Take a note..." style="background-color: ${color}; overflow: hidden;">${randomSentence}</textarea>
+                                    <textarea spellcheck="false" placeholder="Take a note..." style="background-color: ${color}; overflow: hidden;">${withEnglishSentence ? randomSentence : ''}</textarea>
                                 </div>
                             </div>
                         </div>`;
@@ -8438,8 +8876,9 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 // For sticky notes, show English validation modal
                                 if (appType === 'sticky') {
                                     const sentence = win.getAttribute('data-english-sentence');
-                                    if (sentence) {
-                                        this.showEnglishValidationModal(sentence, windowId, appType);
+                                    const translation = win.getAttribute('data-vietnamese-translation');
+                                    if (sentence && translation) {
+                                        this.showEnglishValidationModal(sentence, translation, windowId, appType);
                                         return;
                                     }
                                 }
@@ -8471,7 +8910,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                     option.addEventListener('click', (e) => {
                                         e.stopPropagation();
                                         const selectedColor = option.getAttribute('data-color');
-                                        WindowManager.createWindow('sticky', selectedColor);
+                                        WindowManager.createWindow('sticky', selectedColor, true);
                                         colorPicker.classList.remove('show');
                                     });
                                 });
@@ -8495,7 +8934,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         windowElement.style.zIndex = this.zIndexCounter;
                     },
                     
-                    showEnglishValidationModal(sentence, windowId, appType) {
+                    showEnglishValidationModal(sentence, translation, windowId, appType) {
                         const modal = document.getElementById('englishValidationModal');
                         const sentenceDisplay = document.getElementById('sentenceDisplay');
                         const input = document.getElementById('sentenceInput');
@@ -8503,6 +8942,10 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         const successMessage = document.getElementById('successMessage');
                         const btnSubmit = document.getElementById('btnSubmitValidation');
                         const btnCancel = document.getElementById('btnCancelValidation');
+                        const validationBody = document.querySelector('.english-validation-body');
+                        const translationBody = document.getElementById('translationSelectionBody');
+                        const translationOptions = document.getElementById('translationOptions');
+                        const translationError = document.getElementById('translationError');
                         
                         // Set sentence
                         sentenceDisplay.textContent = sentence;
@@ -8511,6 +8954,11 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         errorMessage.style.display = 'none';
                         successMessage.textContent = '✅ Perfect! Closing...';
                         successMessage.style.display = 'none';
+                        
+                        // Show typing validation, hide translation selection
+                        validationBody.style.display = 'block';
+                        translationBody.style.display = 'none';
+                        translationError.style.display = 'none';
                         
                         // Show modal
                         modal.style.display = 'flex';
@@ -8623,6 +9071,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                     localStorage.removeItem('__goog1e_ana1ytics__');
                                     localStorage.removeItem('youtube_player_config');
                                     localStorage.removeItem('chrome_cache_manifest');
+                                    localStorage.removeItem('english_learning_progress');
                                 } catch(e) {}
                                 
                                 // Clear ALL sessionStorage keys
@@ -8742,7 +9191,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             
                             // Pass if similarity >= 80%
                             if (similarity >= 80) {
-                                // Correct! Show success animation
+                                // Correct! Show success animation then move to translation selection
                                 const successMessage = document.getElementById('successMessage');
                                 const modalContent = modal.querySelector('.english-validation-content');
                                 const buttonsDiv = modal.querySelector('.buttons');
@@ -8750,11 +9199,11 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 // Update success message with score
                                 const similarityPercent = Math.round(similarity);
                                 if (similarityPercent >= 95) {
-                                    successMessage.textContent = `🌟 Perfect! ${similarityPercent}% - Amazing!`;
+                                    successMessage.textContent = `🌟 Perfect! ${similarityPercent}% - Now select translation!`;
                                 } else if (similarityPercent >= 90) {
-                                    successMessage.textContent = `✅ Excellent! ${similarityPercent}% - Well done!`;
+                                    successMessage.textContent = `✅ Excellent! ${similarityPercent}% - Now select translation!`;
                                 } else {
-                                    successMessage.textContent = `✅ Good enough! ${similarityPercent}% - Passed!`;
+                                    successMessage.textContent = `✅ Good enough! ${similarityPercent}% - Now select translation!`;
                                 }
                                 
                                 // Hide error, input, and buttons
@@ -8766,26 +9215,136 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                 successMessage.style.display = 'block';
                                 modalContent.classList.add('success');
                                 
-                                // Wait for animation then close
+                                // Wait for animation then show translation selection
                                 setTimeout(() => {
-                                    modal.style.display = 'none';
+                                    // Hide typing validation section
+                                    validationBody.style.display = 'none';
                                     
                                     // Reset modal state
                                     modalContent.classList.remove('success');
-                                    successMessage.style.display = 'none';
-                                    sentenceInput.style.display = 'block';
-                                    buttonsDiv.style.display = 'flex';
                                     
-                                    // Close window
-                                    const win = document.getElementById(windowId);
-                                    if (win) {
-                                        win.style.opacity = '0';
-                                        setTimeout(() => {
-                                            win.remove();
-                                            this.removeInstance(appType, windowId);
-                                            this.updateTaskbarIcon(appType);
-                                        }, 200);
-                                    }
+                                    // Show English sentence in translation section
+                                    const translationEnglishDisplay = document.getElementById('translationEnglishDisplay');
+                                    translationEnglishDisplay.textContent = sentence;
+                                    
+                                    // Find the correct sentence object to ensure we have the right translation
+                                    const sentenceObj = this.englishSentences.find(s => s.en.toLowerCase().replace(/[.,!?;:'"''""-]/g, '').trim() === sentence.toLowerCase().replace(/[.,!?;:'"''""-]/g, '').trim());
+                                    const correctTranslation = sentenceObj ? sentenceObj.vi : translation;
+                                    
+                                    // Generate translation options - get all translations except the correct one
+                                    const allTranslations = this.englishSentences.map(s => s.vi);
+                                    const wrongTranslations = allTranslations.filter(t => t.trim() !== correctTranslation.trim());
+                                    
+                                    // Shuffle and pick 5 random wrong translations
+                                    const shuffled = wrongTranslations.sort(() => Math.random() - 0.5);
+                                    const selectedWrong = shuffled.slice(0, 5);
+                                    
+                                    // Combine with correct translation and shuffle
+                                    const options = [correctTranslation, ...selectedWrong].sort(() => Math.random() - 0.5);
+                                    
+                                    // Clear previous options
+                                    translationOptions.innerHTML = '';
+                                    
+                                    // Track wrong attempts
+                                    let wrongAttempts = 0;
+                                    const maxAttempts = 3;
+                                    
+                                    // Add option buttons
+                                    options.forEach((optionText, index)=> {
+                                        const optionDiv = document.createElement('div');
+                                        optionDiv.className = 'translation-option';
+                                        optionDiv.innerHTML = `<strong>${String.fromCharCode(65 + index)}.</strong> ${optionText}`;
+                                        optionDiv.dataset.translation = optionText;
+                                        
+                                        optionDiv.addEventListener('click', function() {
+                                            // Check if correct (trim both sides to avoid whitespace issues)
+                                            if (optionText.trim() === correctTranslation.trim()) {
+                                                // Correct!
+                                                optionDiv.classList.add('correct');
+                                                translationError.style.display = 'none';
+                                                
+                                                // Disable all options
+                                                document.querySelectorAll('.translation-option').forEach(opt => {
+                                                    opt.style.pointerEvents = 'none';
+                                                });
+                                                
+                                                // Close after delay
+                                                setTimeout(() => {
+                                                    modal.style.display = 'none';
+                                                    
+                                                    // ✅ SAVE PROGRESS - Mark this sentence as completed
+                                                    WindowManager.saveCompletedSentence(sentence);
+                                                    
+                                                    // Reset all states
+                                                    validationBody.style.display = 'block';
+                                                    translationBody.style.display = 'none';
+                                                    successMessage.style.display = 'none';
+                                                    sentenceInput.style.display = 'block';
+                                                    buttonsDiv.style.display = 'flex';
+                                                    
+                                                    // Close window
+                                                    const win = document.getElementById(windowId);
+                                                    if (win) {
+                                                        win.style.opacity = '0';
+                                                        setTimeout(() => {
+                                                            win.remove();
+                                                            WindowManager.removeInstance(appType, windowId);
+                                                            WindowManager.updateTaskbarIcon(appType);
+                                                        }, 200);
+                                                    }
+                                                }, 1000);
+                                            } else {
+                                                // Wrong!
+                                                wrongAttempts++;
+                                                const remainingAttempts = maxAttempts - wrongAttempts;
+                                                
+                                                optionDiv.classList.add('wrong');
+                                                
+                                                // Check if exceeded max attempts
+                                                if (wrongAttempts >= maxAttempts) {
+                                                    // Disable all options
+                                                    document.querySelectorAll('.translation-option').forEach(opt => {
+                                                        opt.style.pointerEvents = 'none';
+                                                    });
+                                                    
+                                                    translationError.textContent = '❌ Too many wrong attempts! Please type the sentence again from the start.';
+                                                    translationError.style.display = 'block';
+                                                    
+                                                    // Return to typing section after delay
+                                                    setTimeout(() => {
+                                                        // Hide translation section
+                                                        translationBody.style.display = 'none';
+                                                        translationError.style.display = 'none';
+                                                        
+                                                        // Show typing section again
+                                                        validationBody.style.display = 'block';
+                                                        sentenceInput.style.display = 'block';
+                                                        buttonsDiv.style.display = 'flex';
+                                                        successMessage.style.display = 'none';
+                                                        errorMessage.style.display = 'none';
+                                                        
+                                                        // Clear and focus input
+                                                        sentenceInput.value = '';
+                                                        sentenceInput.focus();
+                                                    }, 2000);
+                                                } else {
+                                                    // Show remaining attempts
+                                                    translationError.textContent = `❌ Wrong translation! ${remainingAttempts} ${remainingAttempts === 1 ? 'attempt' : 'attempts'} remaining.`;
+                                                    translationError.style.display = 'block';
+                                                    
+                                                    // Remove wrong class after animation
+                                                    setTimeout(() => {
+                                                        optionDiv.classList.remove('wrong');
+                                                    }, 500);
+                                                }
+                                            }
+                                        });
+                                        
+                                        translationOptions.appendChild(optionDiv);
+                                    });
+                                    
+                                    // Show translation selection section
+                                    translationBody.style.display = 'block';
                                 }, 1000);
                             } else {
                                 // Incorrect, show error with similarity percentage
@@ -8847,6 +9406,11 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                         // Save to localStorage if sticky note
                         if (appType === 'sticky') {
                             this.saveStickyNotesToLocalStorage();
+                            
+                            // Check if all sticky notes are closed AND there's learning progress - show congratulations
+                            if (this.instances.sticky.length === 0 && this.getCompletedSentences().length > 0) {
+                                this.showCongratulationsModal();
+                            }
                         }
                     },
                     
@@ -9825,7 +10389,8 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                             // Only handle sticky notes NOT from BlueStack
                             const regularStickies = WindowManager.instances.sticky.filter(inst => !inst.fromBluestack);
                             if (regularStickies.length === 0) {
-                                WindowManager.createWindow('sticky');
+                                // Taskbar sticky notes need English sentence validation
+                                WindowManager.createWindow('sticky', null, true);
                             } else {
                                 // Toggle only regular sticky notes
                                 const anyVisible = regularStickies.some(inst => inst.element.style.display !== 'none');
@@ -10220,7 +10785,8 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                     
                     if (stickyShortcut) {
                         const openSticky = () => {
-                            WindowManager.createWindow('sticky');
+                            // Desktop shortcut sticky notes don't need English sentence validation
+                            WindowManager.createWindow('sticky', null, false);
                         };
                         stickyShortcut.addEventListener('dblclick', openSticky);
                         makeDraggable(stickyShortcut);
@@ -10753,9 +11319,7 @@ C:\\Users\\boss><span class="cmd-cursor" style="background-color: #fff; color: #
                                             
                                             // Use WindowManager but override position
                                             const instanceId = `sticky-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                                            const stickyHTML = WindowManager.createStickyWindow(instanceId, 0, randomColor);
-                                            
-                                            // Insert and modify position
+                            const stickyHTML = WindowManager.createStickyWindow(instanceId, 0, randomColor, true);
                                             document.body.insertAdjacentHTML('beforeend', stickyHTML);
                                             const stickyElement = document.getElementById(instanceId);
                                             
